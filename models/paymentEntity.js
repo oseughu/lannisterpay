@@ -2,13 +2,7 @@
 const { Model } = require('sequelize')
 module.exports = (sequelize, DataTypes) => {
   class PaymentEntity extends Model {
-    /**
-     * Helper method for defining associations.
-     * This method is not a part of Sequelize lifecycle.
-     * The `models/index` file will call this method automatically.
-     */
     static associate({ Customer }) {
-      // define association here
       this.belongsTo(Customer, { foreignKey: 'customerId', as: 'customer' })
     }
 
