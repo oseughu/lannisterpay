@@ -58,8 +58,7 @@ module.exports = (sequelize, DataTypes) => {
           notNull: { msg: 'Does this user bear the fee?' },
           notEmpty: { msg: 'Bears Fee field cannot be empty' }
         }
-      },
-      balance: { type: DataTypes.DECIMAL(10, 2), defaultValue: 0.0 }
+      }
     },
     {
       sequelize,

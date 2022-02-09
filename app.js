@@ -48,7 +48,7 @@ app.post('/login', async (req, res) => {
 })
 
 app.post('/sign-up', async (req, res) => {
-  const { full_name, email, password } = req.body
+  const { full_name, email, password, bears_fee } = req.body
 
   const alreadyExists = await Customer.findOne({ where: { email } })
 
@@ -59,7 +59,8 @@ app.post('/sign-up', async (req, res) => {
       const newUser = new Customer({
         full_name,
         email,
-        password
+        password,
+        bears_fee
       })
       await newUser.save()
       return res.json(newUser)
