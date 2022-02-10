@@ -86,7 +86,7 @@ app.get(
       return res.json(user)
     } catch (err) {
       console.log(err)
-      return res.status(500).json({ error: 'Something went wrong.' })
+      return res.status(500).json({ Error: 'Something went wrong.' })
     }
   }
 )
@@ -191,7 +191,7 @@ app.post(
         appliedFee = flatPerc(20, 0.5)
       } else {
         return res.status(400).json({
-          error: 'No valid configuration exists for this payment entity.'
+          Error: 'No valid configuration exists for this payment entity.'
         })
       }
 
