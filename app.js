@@ -6,6 +6,8 @@ const session = require('express-session')
 const port = process.env.PORT || 3000
 const passport = require('passport')
 const jwt = require('jsonwebtoken')
+const bcrypt = require('bcrypt')
+const saltRounds = 10
 require('./auth/passport')
 
 const { sequelize, Customer, Transaction, PaymentEntity } = require('./models')
@@ -21,49 +23,55 @@ app.use(
   })
 )
 
+app.post('/sign-up', async (req, res) => {
+  const { full_name, email, password, bears_fee } = req.body
+
+  try {
+    const alreadyExists = await Customer.findOne({ where: { email } })
+    if (alreadyExists) {
+      return res.json({ error: 'User already exists. Log in instead.' })
+    } else {
+      bcrypt.hash(password, saltRounds, (err, hash) => {
+        const newUser = new Customer({
+          full_name,
+          email,
+          password: hash,
+          bears_fee
+        })
+        newUser.save()
+        return res.json(newUser)
+      })
+    }
+  } catch (error) {
+    console.log(error)
+    return res.status(500).json(error)
+  }
+})
+
 app.post('/login', async (req, res) => {
   const { email, password } = req.body
 
   const customer = await Customer.findOne({ where: { email } })
 
   try {
-    if (!customer) {
-      return res.json({ message: 'Email or password does not match!' })
-    } else if (customer.password != password) {
-      return res.json({ message: 'Email or password does not match!' })
-    } else {
-      const jwtToken = jwt.sign(
-        { id: customer.id, email: customer.email },
-        process.env.SECRET
-      )
-      return res.json({
-        msg: 'Welcome to Lannister Pay!!',
-        token: jwtToken
+    if (customer) {
+      bcrypt.compare(password, customer.password, (err, result) => {
+        if (result) {
+          const jwtToken = jwt.sign(
+            { id: customer.id, email: customer.email },
+            process.env.SECRET
+          )
+
+          return res.json({
+            msg: 'Welcome to Lannister Pay!!',
+            token: jwtToken
+          })
+        } else {
+          return res.json({ message: 'Email or password does not match!' })
+        }
       })
-    }
-  } catch (err) {
-    console.log(err)
-    return res.status(500).json(err)
-  }
-})
-
-app.post('/sign-up', async (req, res) => {
-  const { full_name, email, password, bears_fee } = req.body
-
-  const alreadyExists = await Customer.findOne({ where: { email } })
-
-  try {
-    if (alreadyExists) {
-      return res.json({ error: 'User already exists. Log in instead.' })
     } else {
-      const newUser = new Customer({
-        full_name,
-        email,
-        password,
-        bears_fee
-      })
-      await newUser.save()
-      return res.json(newUser)
+      return res.json({ message: 'Email or password does not match!' })
     }
   } catch (err) {
     console.log(err)
