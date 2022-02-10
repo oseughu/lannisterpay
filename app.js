@@ -57,7 +57,7 @@ app.post('/login', async (req, res) => {
 
   try {
     if (customer) {
-      bcrypt.compare(password, customer.password, (error, result) => {
+      bcrypt.compare(password, customer.password, (err, result) => {
         if (result) {
           const jwtToken = jwt.sign(
             { id: customer.id, email: customer.email },
@@ -79,9 +79,9 @@ app.post('/login', async (req, res) => {
         .status(400)
         .json({ Error: 'Email or password does not match!' })
     }
-  } catch (err) {
-    console.log(err)
-    return res.status(500).json(err)
+  } catch (error) {
+    console.log(error)
+    return res.status(500).json(error)
   }
 })
 
