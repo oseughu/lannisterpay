@@ -128,7 +128,6 @@ app.post(
     let feeConfig
     let appliedFee
     let ChargeAmount
-    let SettlementAmount
 
     try {
       const paymentMethod = await PaymentEntity.findOne({
@@ -196,19 +195,16 @@ app.post(
         })
       }
 
-      if (customer.bears_fee === true) {
-        ChargeAmount = parseFloat(transaction.amount) + parseFloat(appliedFee)
-        SettlementAmount = ChargeAmount - appliedFee
-      } else {
-        ChargeAmount = parseFloat(transaction.amount)
-        SettlementAmount = ChargeAmount - appliedFee
-      }
+      customer.bears_fee
+        ? (ChargeAmount =
+            parseFloat(transaction.amount) + parseFloat(appliedFee))
+        : (ChargeAmount = transaction.amount)
 
       return res.json({
         AppliedFeeID: feeConfig,
         AppliedFeeValue: appliedFee,
         ChargeAmount,
-        SettlementAmount
+        SettlementAmount: ChargeAmount - appliedFee
       })
     } catch (err) {
       console.log(err)
