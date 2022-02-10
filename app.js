@@ -198,7 +198,7 @@ app.post(
 
       if (customer.bears_fee === true) {
         ChargeAmount = parseFloat(transaction.amount) + parseFloat(appliedFee)
-        SettlementAmount = parseFloat(ChargeAmount) - parseFloat(appliedFee)
+        SettlementAmount = ChargeAmount - appliedFee
       } else {
         ChargeAmount = parseFloat(transaction.amount)
         SettlementAmount = ChargeAmount - appliedFee
