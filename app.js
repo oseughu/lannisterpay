@@ -29,7 +29,9 @@ app.post('/sign-up', async (req, res) => {
   try {
     const alreadyExists = await Customer.findOne({ where: { email } })
     if (alreadyExists) {
-      return res.json({ error: 'User already exists. Log in instead.' })
+      return res
+        .status(400)
+        .json({ Error: 'User already exists. Log in instead.' })
     } else {
       bcrypt.hash(password, saltRounds, (err, hash) => {
         const newUser = new Customer({
@@ -55,7 +57,7 @@ app.post('/login', async (req, res) => {
 
   try {
     if (customer) {
-      bcrypt.compare(password, customer.password, (err, result) => {
+      bcrypt.compare(password, customer.password, (error, result) => {
         if (result) {
           const jwtToken = jwt.sign(
             { id: customer.id, email: customer.email },
@@ -67,11 +69,15 @@ app.post('/login', async (req, res) => {
             token: jwtToken
           })
         } else {
-          return res.json({ message: 'Email or password does not match!' })
+          return res
+            .status(400)
+            .json({ Error: 'Email or password does not match!' })
         }
       })
     } else {
-      return res.json({ message: 'Email or password does not match!' })
+      return res
+        .status(400)
+        .json({ Error: 'Email or password does not match!' })
     }
   } catch (err) {
     console.log(err)
