@@ -127,13 +127,15 @@ app.post(
 
     let feeConfig
     let appliedFee
+    let ChargeAmount
+    let SettlementAmount
 
     try {
-      const customer = await Customer.findOne({
-        where: { uuid: userUuid }
-      })
       const paymentMethod = await PaymentEntity.findOne({
         where: { uuid: paymentEntityUuid }
+      })
+      const customer = await Customer.findOne({
+        where: { id: paymentMethod.customerId }
       })
       const transaction = new Transaction({
         paymentEntityId: paymentMethod.id,
@@ -143,34 +145,38 @@ app.post(
       })
       await transaction.save()
 
-      const perc = x => {
-        return ((x * transaction.amount) / 100).toFixed(2)
+      const perc = n => {
+        return (n * transaction.amount) / 100
       }
 
-      const flatPerc = (flat, x) => {
-        return ((x * transaction.amount) / 100 + flat).toFixed(2)
+      const flatPerc = (flat, n) => {
+        return flat + (n * transaction.amount) / 100
       }
 
       if (
+        transaction.currency_country === 'NG' &&
         transaction.currency === 'NGN' &&
         paymentMethod.type === 'CREDIT-CARD'
       ) {
         feeConfig = 'LNPY1221'
         appliedFee = perc(1.4)
       } else if (
-        transaction.currency !== 'NGN' &&
+        transaction.currency_country !== 'NG' &&
+        transaction.currency === 'NGN' &&
         paymentMethod.brand === 'MASTERCARD' &&
         paymentMethod.type === 'CREDIT-CARD'
       ) {
         feeConfig = 'LNPY1222'
         appliedFee = perc(3.8)
       } else if (
-        transaction.currency !== 'NGN' &&
+        transaction.currency_country !== 'NG' &&
+        transaction.currency === 'NGN' &&
         paymentMethod.type === 'CREDIT-CARD'
       ) {
         feeConfig = 'LNPY1223'
         appliedFee = perc(5.8)
       } else if (
+        transaction.currency_country === 'NG' &&
         transaction.currency === 'NGN' &&
         paymentMethod.type === 'USSD' &&
         paymentMethod.brand === 'MTN'
@@ -178,6 +184,7 @@ app.post(
         feeConfig = 'LNPY1224'
         appliedFee = flatPerc(20, 0.5)
       } else if (
+        transaction.currency_country === 'NG' &&
         transaction.currency === 'NGN' &&
         paymentMethod.type === 'USSD'
       ) {
@@ -189,15 +196,19 @@ app.post(
         })
       }
 
-      const charge = customer.bears_fee
-        ? payment.amount + appliedFee
-        : payment.amount
+      if (customer.bears_fee === true) {
+        ChargeAmount = parseFloat(transaction.amount) + parseFloat(appliedFee)
+        SettlementAmount = parseFloat(ChargeAmount) - parseFloat(appliedFee)
+      } else {
+        ChargeAmount = parseFloat(transaction.amount)
+        SettlementAmount = ChargeAmount - appliedFee
+      }
 
       return res.json({
         AppliedFeeID: feeConfig,
         AppliedFeeValue: appliedFee,
-        ChargeAmount: charge,
-        SettlementAmount: ChargeAmount - AppliedFeeValue
+        ChargeAmount,
+        SettlementAmount
       })
     } catch (err) {
       console.log(err)

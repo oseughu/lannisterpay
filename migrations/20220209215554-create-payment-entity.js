@@ -26,7 +26,7 @@ module.exports = {
         allowNull: false
       },
       number: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.BIGINT,
         allowNull: true
       },
       six_id: {

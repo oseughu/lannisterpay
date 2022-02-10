@@ -1,3 +1,3 @@
-# Fundall Backend Support Engineer Task
+# Flutterwave Backend Engineer Assessment
 
-This api was built to support the flow for an e-wallet prototype. It covers basic validation, security and data management. Built with Node, Express, MySQL2, and Sequelize. Hosted on Heroku and Clever Cloud.
+This api was built to compute transaction fees using specific configurations. It covers basic validation, security and data management. Built with Node, Express, MySQL2, and Sequelize. Hosted on Heroku and Clever Cloud.

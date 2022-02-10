@@ -34,19 +34,12 @@ module.exports = (sequelize, DataTypes) => {
           notNull: {
             msg: 'Please enter a payment entity type (credit-card, debit-card)'
           },
-          notEmpty: { msg: 'Card type cannot be blank' },
-          isIn: [
-            ['CREDIT-CARD', 'DEBIT-CARD', 'BANK-ACCOUNT', 'USSD', 'WALLET-ID']
-          ]
+          notEmpty: { msg: 'Payment entity type cannot be blank' }
         }
       },
       brand: {
         type: DataTypes.STRING,
-        allowNull: false,
-        validate: {
-          notNull: { msg: 'Please enter a brand (MASTERCARD, VISA)' },
-          notEmpty: { msg: 'Brand field cannot be blank' }
-        }
+        defaultValue: DataTypes.STRING
       },
       country: {
         type: DataTypes.STRING,
@@ -58,9 +51,10 @@ module.exports = (sequelize, DataTypes) => {
         }
       },
       number: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.BIGINT,
         validate: {
-          isCreditCard: { msg: 'Please enter a valid 16-digit card number' }
+          isNumeric: { msg: 'Please enter a valid 16-digit card number' },
+          len: [16, 16]
         }
       },
       six_id: {
