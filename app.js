@@ -190,7 +190,7 @@ app.post(
         feeConfig = 'LNPY1225'
         appliedFee = flatPerc(20, 0.5)
       } else {
-        return res.json({
+        return res.status(500).json({
           error: 'No valid configuration exists for this payment entity.'
         })
       }
