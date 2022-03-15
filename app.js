@@ -201,13 +201,13 @@ app.post(
   '/compute-transaction-fee',
   passport.authenticate('jwt', { session: false }),
   async (req, res) => {
-    const { paymentEntityId, amount, currency } = req.body
+    const { paymentEntityUuid, amount, currency } = req.body
 
     let ChargeAmount
 
     try {
       const paymentMethod = await PaymentEntity.findOne({
-        where: { id: paymentEntityId }
+        where: { uuid: paymentEntityUuid }
       })
 
       const customer = await Customer.findOne({

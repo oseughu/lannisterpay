@@ -17,12 +17,7 @@ module.exports = (sequelize, DataTypes) => {
 
   PaymentEntity.init(
     {
-      id: {
-        allowNull: false,
-        autoIncrement: true,
-        primaryKey: true,
-        type: DataTypes.INTEGER
-      },
+      uuid: { type: DataTypes.UUIDV4, defaultValue: DataTypes.UUIDV4 },
       issuer: {
         type: DataTypes.STRING,
         allowNull: false,
