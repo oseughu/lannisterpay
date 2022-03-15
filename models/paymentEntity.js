@@ -17,6 +17,12 @@ module.exports = (sequelize, DataTypes) => {
 
   PaymentEntity.init(
     {
+      id: {
+        allowNull: false,
+        autoIncrement: true,
+        primaryKey: true,
+        type: DataTypes.INTEGER
+      },
       issuer: {
         type: DataTypes.STRING,
         allowNull: false,

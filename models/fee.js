@@ -20,6 +20,12 @@ module.exports = (sequelize, DataTypes) => {
   }
   Fee.init(
     {
+      id: {
+        allowNull: false,
+        autoIncrement: true,
+        primaryKey: true,
+        type: DataTypes.INTEGER
+      },
       fee_id: {
         type: DataTypes.STRING,
         allowNull: false,
