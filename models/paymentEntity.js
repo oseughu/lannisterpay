@@ -47,7 +47,7 @@ module.exports = (sequelize, DataTypes) => {
         validate: {
           notNull: { msg: 'Please enter a country' },
           notEmpty: { msg: 'Country field cannot be blank' },
-          isIn: [['NG']]
+          isIn: [['NG', 'US', 'UK']]
         }
       },
       number: {

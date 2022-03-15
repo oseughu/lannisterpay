@@ -19,7 +19,7 @@ const {
   Fee
 } = require('./models')
 
-const Op = sequelize.Op
+const { Op } = require('@sequelize/core')
 
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
@@ -182,8 +182,6 @@ app.post(
   async (req, res) => {
     const { paymentEntityUuid, amount, currency } = req.body
 
-    let ChargeAmount
-
     try {
       const paymentMethod = await PaymentEntity.findOne({
         where: { uuid: paymentEntityUuid }
@@ -198,22 +196,20 @@ app.post(
           [Op.or]: [
             {
               fee_currency: currency,
-              [Op.ne]: { fee_locale: 'INTL' },
               fee_entity: _.toUpper(_.kebabCase(paymentMethod.type)),
-              entity_property: paymentMethod.brand || paymentMethod.issuer
+              entity_property: paymentMethod.brand
             },
             {
               fee_currency: currency,
-              [Op.ne]: { fee_locale: 'INTL' },
               fee_entity: _.toUpper(_.kebabCase(paymentMethod.type))
             },
             {
-              [Op.ne]: { fee_currency: currency, fee_locale: 'LOCL' },
+              fee_currency: currency,
               fee_entity: _.toUpper(_.kebabCase(paymentMethod.type)),
-              entity_property: paymentMethod.brand || paymentMethod.issuer
+              entity_property: paymentMethod.brand
             },
             {
-              [Op.ne]: { fee_currency: currency, fee_locale: 'LOCL' },
+              fee_currency: currency,
               fee_entity: _.toUpper(_.kebabCase(paymentMethod.type))
             }
           ]
@@ -246,16 +242,16 @@ app.post(
         }
       }
 
-      customer.bears_fee
-        ? (ChargeAmount =
-            parseFloat(transaction.amount) + parseFloat(appliedFee))
-        : (ChargeAmount = transaction.amount)
+      const chargeAmount = () =>
+        customer.bears_fee
+          ? parseFloat(transaction.amount) + parseFloat(appliedFee())
+          : parseFloat(transaction.amount)
 
       return res.json({
         AppliedFeeID: feeConfig.fee_id,
         AppliedFeeValue: appliedFee(),
-        ChargeAmount,
-        SettlementAmount: ChargeAmount - appliedFee
+        ChargeAmount: chargeAmount(),
+        SettlementAmount: chargeAmount() - appliedFee()
       })
     } catch (err) {
       console.log(err)
