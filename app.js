@@ -9,7 +9,6 @@ const passport = require('passport')
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcrypt')
 const saltRounds = 10
-const Op = sequelize.Op
 require('./auth/passport')
 
 const {
@@ -19,6 +18,8 @@ const {
   PaymentEntity,
   Fee
 } = require('./models')
+
+const Op = sequelize.Op
 
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
@@ -124,9 +125,9 @@ app.post(
       })
       const paymentEntity = new PaymentEntity({
         customerId: customer.id,
-        issuer,
+        issuer, //GTBANK, MTN
         type,
-        brand, //optional
+        brand, //optional, MASTERCARD, VISA
         country,
         number, //credit card or phone number
         six_id: sixId //last six digits of credit card, can be null for phone number
@@ -148,8 +149,8 @@ app.post(
       feeId,
       feeLocale,
       feeCurrency,
-      feeEntity,
-      entityProperty, //optional
+      feeEntity, //CREDIT-CARD, DEBIT-CARD, BANK-ACCOUNT, USSD
+      entityProperty, //optional, MASTERCARD, VISA, MTN, GTBANK
       feeType, //flat, perc or flat perc
       feeFlat, //optional, default is 0
       feeValue
