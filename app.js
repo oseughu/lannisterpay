@@ -19,8 +19,6 @@ const {
   Fee
 } = require('./models')
 
-const { Op } = require('@sequelize/core')
-
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
 
@@ -193,17 +191,9 @@ app.post(
 
       const feeConfig = await Fee.findOne({
         where: {
-          [Op.or]: [
-            {
-              fee_currency: currency,
-              fee_entity: _.toUpper(_.kebabCase(paymentMethod.type)),
-              entity_property: paymentMethod.brand
-            },
-            {
-              fee_currency: currency,
-              fee_entity: _.toUpper(_.kebabCase(paymentMethod.type))
-            }
-          ]
+          fee_currency: currency,
+          fee_entity: _.toUpper(_.kebabCase(paymentMethod.type)),
+          entity_property: paymentMethod.brand
         }
       })
 
