@@ -25,9 +25,9 @@ the uuid for each payment entity is returned after it has been added successfull
 
 ## To Add a new fee configuration specification, you need to fill the following fields:
 
-- feeId
-- feeLocale
-- feeCurrency
+- feeId (8 alphanumeric characters in the format "LNPY\*\*\*\*")
+- feeLocale (LOCL or INTL)
+- feeCurrency (NGN, USD, GBP)
 - feeEntity (CREDIT-CARD, DEBIT-CARD, BANK-ACCOUNT, USSD)
 - entityProperty (optional, MASTERCARD, VISA, MTN, GTBANK)
 - feeType (FLAT, PERC OR FLAT PERC)
