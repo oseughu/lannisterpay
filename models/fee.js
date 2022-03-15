@@ -74,6 +74,7 @@ module.exports = (sequelize, DataTypes) => {
             msg: 'Please enter a fee type (FLAT, PERC, OR FLAT PERC)'
           },
           notEmpty: { msg: 'Fee type cannot be blank' },
+          isUppercase: { msg: 'Fee type should be in uppercase letters' },
           isIn: [['FLAT', 'PERC', 'FLAT PERC']]
         }
       },
