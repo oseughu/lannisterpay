@@ -80,8 +80,8 @@ app.post('/login', async (req, res) => {
               mode: 'formdata',
               formdata: [
                 { key: 'grant_type', value: jwtToken },
-                { key: 'client_id', value: email },
-                { key: 'client_secret', value: password }
+                { key: 'client_id', value: customer.id },
+                { key: 'client_secret', value: process.env.SECRET }
               ]
             }
           }
