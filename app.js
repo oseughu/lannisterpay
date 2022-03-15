@@ -94,7 +94,7 @@ app.post('/register', async (req, res) => {
 
 app.get(
   '/customer/:uuid',
-  passport.authenticate('jwt', { session: false }),
+  //passport.authenticate('jwt', { session: false }),
   async (req, res) => {
     const uuid = req.params.uuid
 
