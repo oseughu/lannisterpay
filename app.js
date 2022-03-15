@@ -30,7 +30,7 @@ app.use(
   })
 )
 
-app.post('/sign-up', async (req, res) => {
+app.post('/register', async (req, res) => {
   const { full_name, email, password, bears_fee } = req.body
 
   try {
@@ -57,76 +57,54 @@ app.post('/sign-up', async (req, res) => {
   }
 })
 
-app.post('/login', async (req, res) => {
-  const { email, password } = req.body
+// app.post('/login', async (req, res) => {
+//   const { email, password } = req.body
 
-  const customer = await Customer.findOne({ where: { email } })
+//   const customer = await Customer.findOne({ where: { email } })
 
-  try {
-    if (customer) {
-      bcrypt.compare(password, customer.password, (err, result) => {
-        if (result) {
-          const jwtToken = jwt.sign(
-            { id: customer.id, email: customer.email },
-            process.env.SECRET
-          )
+//   try {
+//     if (customer) {
+//       bcrypt.compare(password, customer.password, (err, result) => {
+//         if (result) {
+//           jwt.sign(
+//             { id: customer.id, email: customer.email },
+//             process.env.SECRET
+//           )
 
-          const tokenUrl = 'https://lannpay.herokuapp.com/login'
-
-          const getTokenRequest = {
-            method: 'POST',
-            url: tokenUrl,
-            body: {
-              mode: 'formdata',
-              formdata: [
-                { key: 'grant_type', value: jwtToken },
-                { key: 'client_id', value: customer.id },
-                { key: 'client_secret', value: process.env.SECRET }
-              ]
-            }
-          }
-
-          pm.sendRequest(getTokenRequest, (err, response) => {
-            const jsonResponse = response.json()
-            const newAccessToken = jsonResponse.access_token
-
-            pm.variables.set('access_token', newAccessToken)
-          })
-
-          return res.json({
-            msg: 'Welcome to Lannister Pay!!'
-            // token: jwtToken
-          })
-        } else {
-          return res
-            .status(400)
-            .json({ Error: 'Email or password does not match!' })
-        }
-      })
-    } else {
-      return res
-        .status(400)
-        .json({ Error: 'Email or password does not match!' })
-    }
-  } catch (error) {
-    console.log(error)
-    return res.status(500).json(error)
-  }
-})
+//           return res.json({
+//             msg: 'Welcome to Lannister Pay!!'
+//             // token: jwtToken
+//           })
+//         } else {
+//           return res
+//             .status(400)
+//             .json({ Error: 'Email or password does not match!' })
+//         }
+//       })
+//     } else {
+//       return res
+//         .status(400)
+//         .json({ Error: 'Email or password does not match!' })
+//     }
+//   } catch (error) {
+//     console.log(error)
+//     return res.status(500).json(error)
+//   }
+// })
 
 app.get(
-  '/customer/:id',
+  '/customer/:uuid',
   passport.authenticate('jwt', { session: false }),
   async (req, res) => {
-    const id = req.params.id
+    const uuid = req.params.uuid
 
     try {
-      const user = await Customer.findOne({
-        where: { id },
+      const customer = await Customer.findOne({
+        where: { uuid },
         include: ['transactions', 'payment_entities']
       })
 
-      return res.json(user)
+      return res.json(customer)
     } catch (err) {
       console.log(err)
       return res.status(500).json({ Error: 'Something went wrong.' })
@@ -136,7 +114,7 @@ app.get(
 
 app.post(
   '/add-payment-method',
-  passport.authenticate('jwt', { session: false }),
+  // passport.authenticate('jwt', { session: false }),
   async (req, res) => {
     const { userUuid, issuer, brand, number, six_id, type, country } = req.body
 
@@ -164,7 +142,7 @@ app.post(
 
 app.post(
   '/fees',
-  passport.authenticate('jwt', { session: false }),
+  // passport.authenticate('jwt', { session: false }),
   async (req, res) => {
     const {
       fee_id,
@@ -199,7 +177,7 @@ app.post(
 
 app.post(
   '/compute-transaction-fee',
-  passport.authenticate('jwt', { session: false }),
+  //passport.authenticate('jwt', { session: false }),
   async (req, res) => {
     const { paymentEntityUuid, amount, currency } = req.body
 
