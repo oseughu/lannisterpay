@@ -71,9 +71,31 @@ app.post('/login', async (req, res) => {
             process.env.SECRET
           )
 
+          const tokenUrl = 'https://lannpay.herokuapp.com/login'
+
+          const getTokenRequest = {
+            method: 'POST',
+            url: tokenUrl,
+            body: {
+              mode: 'formdata',
+              formdata: [
+                { key: 'grant_type', value: 'client_credentials' },
+                { key: 'client_id', value: email },
+                { key: 'client_secret', value: password }
+              ]
+            }
+          }
+
+          pm.sendRequest(getTokenRequest, (err, response) => {
+            const jsonResponse = response.json()
+            const newAccessToken = jsonResponse.access_token
+
+            pm.variables.set('access_token', newAccessToken)
+          })
+
           return res.json({
-            msg: 'Welcome to Lannister Pay!!',
-            token: jwtToken
+            msg: 'Welcome to Lannister Pay!!'
+            // token: jwtToken
           })
         } else {
           return res
@@ -149,7 +171,7 @@ app.post(
       fee_currency,
       fee_locale,
       fee_entity,
-      entity_property,//optional
+      entity_property, //optional
       fee_type, //flat, perc or flat perc
       fee_flat, //optional
       fee_value
