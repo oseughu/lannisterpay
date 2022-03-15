@@ -9,6 +9,7 @@ const passport = require('passport')
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcrypt')
 const saltRounds = 10
+const Op = sequelize.Op
 require('./auth/passport')
 
 const {
@@ -193,9 +194,18 @@ app.post(
 
       const feeConfig = await Fee.findOne({
         where: {
-          fee_currency: currency,
-          entity_property: paymentMethod.brand,
-          fee_entity: _.toUpper(_.kebabCase(paymentMethod.type))
+          [Op.or]: [
+            {
+              fee_currency: currency,
+              fee_entity: _.toUpper(_.kebabCase(paymentMethod.type)),
+              entity_property: paymentMethod.brand || paymentMethod.issuer
+            },
+            {
+              fee_currency: currency,
+              fee_entity: _.toUpper(_.kebabCase(paymentMethod.type))
+            },
+            { [Op.ne]: { fee_currency: currency } }
+          ]
         }
       })
 
