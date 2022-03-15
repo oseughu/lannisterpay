@@ -4,6 +4,8 @@ This api was built to compute transaction fees using specific configurations. Bu
 
 ## Please start by signing up with the following details in the request:
 
+https://lannpay.herokuapp.com/register
+
 - fullName
 - email
 - password
@@ -12,6 +14,8 @@ This api was built to compute transaction fees using specific configurations. Bu
 Please copy your unique user identifier (uuid) and keep it handy as you cannot add a payment entity or make a transaction without it. If you lose it, just sign up again with a different email, it doesn't have to be a real one, just valid email syntax.
 
 ## Add a payment method by filling in the following fields (urlencoded or json, both work):
+
+https://lannpay.herokuapp.com/add-payment-method
 
 - customerUuid (your uuid)
 - issuer (GTBANK, MTN)
@@ -25,6 +29,8 @@ the uuid for each payment entity is returned after it has been added successfull
 
 ## To Add a new fee configuration specification, you need to fill the following fields:
 
+https://lannpay.herokuapp.com/fees
+
 - feeId (8 alphanumeric characters in the format "LNPY\*\*\*\*")
 - feeLocale (LOCL or INTL)
 - feeCurrency (NGN, USD, GBP)
@@ -35,6 +41,8 @@ the uuid for each payment entity is returned after it has been added successfull
 - feeValue (amount to be charged for the transaction fee, can be decimal)
 
 ## And finally, to compute your transaction fee, you only need three fields:
+
+https://lannpay.herokuapp.com/compute-transaction-fee
 
 - paymentEntityUuid (uuid for your preferred payment method, this is different from the user uuid so be careful.)
 - amount (cost of the transaction)
