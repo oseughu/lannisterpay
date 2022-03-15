@@ -31,7 +31,7 @@ app.use(
 )
 
 app.post('/register', async (req, res) => {
-  const { full_name, email, password, bears_fee } = req.body
+  const { fullName, email, password, bearsFee } = req.body
 
   try {
     const alreadyExists = await Customer.findOne({ where: { email } })
@@ -40,10 +40,10 @@ app.post('/register', async (req, res) => {
     } else {
       bcrypt.hash(password, saltRounds, (err, hash) => {
         const newUser = new Customer({
-          full_name,
+          full_name: fullName,
           email,
           password: hash,
-          bears_fee
+          bears_fee: bearsFee
         })
         newUser.save()
         return res.json(newUser)
@@ -114,20 +114,21 @@ app.post(
   '/add-payment-method',
   // passport.authenticate('jwt', { session: false }),
   async (req, res) => {
-    const { userUuid, issuer, brand, number, six_id, type, country } = req.body
+    const { customerUuid, issuer, type, brand, country, number, six_id } =
+      req.body
 
     try {
       const customer = await Customer.findOne({
-        where: { uuid: userUuid }
+        where: { uuid: customerUuid }
       })
       const paymentEntity = new PaymentEntity({
         customerId: customer.id,
         issuer,
-        brand, //optional
-        number,
-        six_id,
         type,
-        country
+        brand, //optional
+        country,
+        number, //credit card or phone number
+        six_id //last six digits of credit card, can be null for phone number
       })
       await paymentEntity.save()
       return res.json(paymentEntity)
@@ -143,26 +144,26 @@ app.post(
   // passport.authenticate('jwt', { session: false }),
   async (req, res) => {
     const {
-      fee_id,
-      fee_currency,
-      fee_locale,
-      fee_entity,
-      entity_property, //optional
-      fee_type, //flat, perc or flat perc
-      fee_flat, //optional
-      fee_value
+      feeId,
+      feeLocale,
+      feeCurrency,
+      feeEntity,
+      entityProperty, //optional
+      feeType, //flat, perc or flat perc
+      feeFlat, //optional, default is 0
+      feeValue
     } = req.body
 
     try {
       const fee = new Fee({
-        fee_id,
-        fee_currency,
-        fee_locale,
-        fee_entity,
-        entity_property,
-        fee_type,
-        fee_flat,
-        fee_value
+        fee_id: feeId,
+        fee_locale: feeLocale,
+        fee_currency: feeCurrency,
+        fee_entity: feeEntity,
+        entity_property: entityProperty,
+        fee_type: feeType,
+        fee_flat: feeFlat,
+        fee_value: feeValue
       })
       await fee.save()
       return res.json(fee)
@@ -248,7 +249,7 @@ app.post(
 
 app.get(
   '/:uuid/transactions',
-  passport.authenticate('jwt', { session: false }),
+  //passport.authenticate('jwt', { session: false }),
   async (req, res) => {
     const customerUuid = req.params.uuid
 
