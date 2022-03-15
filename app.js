@@ -198,14 +198,24 @@ app.post(
           [Op.or]: [
             {
               fee_currency: currency,
+              [Op.ne]: { fee_locale: 'INTL' },
               fee_entity: _.toUpper(_.kebabCase(paymentMethod.type)),
               entity_property: paymentMethod.brand || paymentMethod.issuer
             },
             {
               fee_currency: currency,
+              [Op.ne]: { fee_locale: 'INTL' },
               fee_entity: _.toUpper(_.kebabCase(paymentMethod.type))
             },
-            { [Op.ne]: { fee_currency: currency } }
+            {
+              [Op.ne]: { fee_currency: currency, fee_locale: 'LOCL' },
+              fee_entity: _.toUpper(_.kebabCase(paymentMethod.type)),
+              entity_property: paymentMethod.brand || paymentMethod.issuer
+            },
+            {
+              [Op.ne]: { fee_currency: currency, fee_locale: 'LOCL' },
+              fee_entity: _.toUpper(_.kebabCase(paymentMethod.type))
+            }
           ]
         }
       })
