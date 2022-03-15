@@ -36,9 +36,7 @@ app.post('/register', async (req, res) => {
   try {
     const alreadyExists = await Customer.findOne({ where: { email } })
     if (alreadyExists) {
-      return res
-        .status(400)
-        .json({ Error: 'User already exists. Log in instead.' })
+      return res.status(400).json({ Error: 'User already exists.' })
     } else {
       bcrypt.hash(password, saltRounds, (err, hash) => {
         const newUser = new Customer({
