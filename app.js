@@ -79,7 +79,7 @@ app.post('/login', async (req, res) => {
             body: {
               mode: 'formdata',
               formdata: [
-                { key: 'grant_type', value: 'client_credentials' },
+                { key: 'grant_type', value: jwtToken },
                 { key: 'client_id', value: email },
                 { key: 'client_secret', value: password }
               ]
