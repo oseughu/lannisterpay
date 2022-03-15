@@ -243,10 +243,6 @@ app.post(
             feeConfig.fee_flat +
             (feeConfig.fee_value * transaction.amount) / 100
           )
-        } else {
-          return res.status(400).json({
-            Error: 'No valid configuration exists for this payment entity.'
-          })
         }
       }
 
