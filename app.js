@@ -1,5 +1,6 @@
 //Require all the necessary modules
 require('dotenv').config()
+var _ = require('lodash')
 const express = require('express')
 const app = express()
 const session = require('express-session')
@@ -10,7 +11,13 @@ const bcrypt = require('bcrypt')
 const saltRounds = 10
 require('./auth/passport')
 
-const { sequelize, Customer, Transaction, PaymentEntity } = require('./models')
+const {
+  sequelize,
+  Customer,
+  Transaction,
+  PaymentEntity,
+  Fee
+} = require('./models')
 
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
@@ -86,14 +93,14 @@ app.post('/login', async (req, res) => {
 })
 
 app.get(
-  '/customer/:uuid',
+  '/customer/:id',
   passport.authenticate('jwt', { session: false }),
   async (req, res) => {
-    const uuid = req.params.uuid
+    const id = req.params.id
 
     try {
       const user = await Customer.findOne({
-        where: { uuid },
+        where: { id },
         include: ['transactions', 'payment_entities']
       })
 
@@ -118,7 +125,7 @@ app.post(
       const paymentEntity = new PaymentEntity({
         customerId: customer.id,
         issuer,
-        brand,
+        brand, //optional
         number,
         six_id,
         type,
@@ -134,79 +141,93 @@ app.post(
 )
 
 app.post(
+  '/fees',
+  passport.authenticate('jwt', { session: false }),
+  async (req, res) => {
+    const {
+      fee_id,
+      fee_currency,
+      fee_locale,
+      fee_entity,
+      entity_property,//optional
+      fee_type, //flat, perc or flat perc
+      fee_flat, //optional
+      fee_value
+    } = req.body
+
+    try {
+      const fee = new Fee({
+        fee_id,
+        fee_currency,
+        fee_locale,
+        fee_entity,
+        entity_property,
+        fee_type,
+        fee_flat,
+        fee_value
+      })
+      await fee.save()
+      return res.json(fee)
+    } catch (err) {
+      console.log(err)
+      return res.status(500).json(err)
+    }
+  }
+)
+
+app.post(
   '/compute-transaction-fee',
   passport.authenticate('jwt', { session: false }),
   async (req, res) => {
-    const { paymentEntityUuid, amount, currency, currency_country } = req.body
+    const { paymentEntityId, amount, currency } = req.body
 
-    let feeConfig
-    let appliedFee
     let ChargeAmount
 
     try {
       const paymentMethod = await PaymentEntity.findOne({
-        where: { uuid: paymentEntityUuid }
+        where: { id: paymentEntityId }
       })
+
       const customer = await Customer.findOne({
         where: { id: paymentMethod.customerId }
       })
-      const transaction = new Transaction({
-        paymentEntityId: paymentMethod.id,
-        amount,
-        currency,
-        currency_country
+
+      const feeConfig = await Fee.findOne({
+        where: {
+          fee_currency: currency,
+          entity_property: paymentMethod.brand,
+          fee_entity: _.toUpper(_.kebabCase(paymentMethod.type))
+        }
       })
-      await transaction.save()
 
-      const perc = n => {
-        return (n * transaction.amount) / 100
-      }
-
-      const flatPerc = (flat, n) => {
-        return flat + (n * transaction.amount) / 100
-      }
-
-      if (
-        transaction.currency_country === 'NG' &&
-        transaction.currency === 'NGN' &&
-        paymentMethod.type === 'CREDIT-CARD'
-      ) {
-        feeConfig = 'LNPY1221'
-        appliedFee = perc(1.4)
-      } else if (
-        transaction.currency_country !== 'NG' &&
-        transaction.currency === 'NGN' &&
-        paymentMethod.brand === 'MASTERCARD' &&
-        paymentMethod.type === 'CREDIT-CARD'
-      ) {
-        feeConfig = 'LNPY1222'
-        appliedFee = perc(3.8)
-      } else if (
-        transaction.currency_country !== 'NG' &&
-        transaction.currency === 'NGN' &&
-        paymentMethod.type === 'CREDIT-CARD'
-      ) {
-        feeConfig = 'LNPY1223'
-        appliedFee = perc(5.8)
-      } else if (
-        transaction.currency_country === 'NG' &&
-        transaction.currency === 'NGN' &&
-        paymentMethod.type === 'USSD' &&
-        paymentMethod.brand === 'MTN'
-      ) {
-        feeConfig = 'LNPY1224'
-        appliedFee = flatPerc(20, 0.5)
-      } else if (
-        transaction.currency_country === 'NG' &&
-        transaction.currency === 'NGN' &&
-        paymentMethod.type === 'USSD'
-      ) {
-        feeConfig = 'LNPY1225'
-        appliedFee = flatPerc(20, 0.5)
-      } else {
+      if (!feeConfig) {
         return res.status(400).json({
           Error: 'No valid configuration exists for this payment entity.'
         })
+      }
+
+      const transaction = new Transaction({
+        paymentEntityId: paymentMethod.id,
+        amount,
+        currency
+      })
+      await transaction.save()
+
+      const appliedFee = () => {
+        if (_.lowerCase(feeConfig.fee_type) === 'flat') {
+          return transaction.amount + feeConfig.fee_flat
+        } else if (_.lowerCase(feeConfig.fee_type) === 'perc') {
+          return (feeConfig.fee_value * transaction.amount) / 100
+        } else if (_.lowerCase(feeConfig.fee_type) === 'flat perc') {
+          return (
+            feeConfig.fee_flat +
+            (feeConfig.fee_value * transaction.amount) / 100
+          )
+        } else {
+          return res.status(400).json({
+            Error: 'No valid configuration exists for this payment entity.'
+          })
+        }
       }
 
       customer.bears_fee
@@ -215,7 +236,7 @@ app.post(
         : (ChargeAmount = transaction.amount)
 
       return res.json({
-        AppliedFeeID: feeConfig,
+        AppliedFeeID: feeConfig.fee_id,
         AppliedFeeValue: appliedFee,
         ChargeAmount,
         SettlementAmount: ChargeAmount - appliedFee

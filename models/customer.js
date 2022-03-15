@@ -16,9 +16,7 @@ module.exports = (sequelize, DataTypes) => {
     toJSON() {
       return {
         ...this.get(),
-        id: undefined,
-        password: undefined,
-        balance: undefined
+        password: undefined
       }
     }
   }
@@ -56,7 +54,7 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
         validate: {
           notNull: { msg: 'Does this user bear the fee?' },
-          notEmpty: { msg: 'Bears Fee field cannot be empty' }
+          notEmpty: { msg: 'bears_fee field cannot be empty' }
         }
       }
     },

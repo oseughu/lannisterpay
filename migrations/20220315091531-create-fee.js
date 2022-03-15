@@ -1,40 +1,44 @@
 'use strict'
 module.exports = {
-  up: async (queryInterface, DataTypes) => {
-    await queryInterface.createTable('payment_entities', {
+  async up(queryInterface, DataTypes) {
+    await queryInterface.createTable('fees', {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: DataTypes.INTEGER
       },
-      issuer: {
+      fee_id: {
         type: DataTypes.STRING,
         allowNull: false
       },
-      type: {
+      fee_locale: {
         type: DataTypes.STRING,
         allowNull: false
       },
-      brand: {
+      fee_currency: {
+        type: DataTypes.STRING,
+        allowNull: false
+      },
+      fee_entity: {
+        type: DataTypes.STRING,
+        allowNull: false
+      },
+      entity_property: {
         type: DataTypes.STRING,
         defaultValue: '*'
       },
-      country: {
+      fee_type: {
         type: DataTypes.STRING,
         allowNull: false
       },
-      number: {
-        type: DataTypes.BIGINT,
-        allowNull: true
-      },
-      six_id: {
+      fee_flat: {
         type: DataTypes.INTEGER,
-        allowNull: true
+        defaultValue: 0
       },
-      customerId: {
-        allowNull: false,
-        type: DataTypes.INTEGER
+      fee_value: {
+        type: DataTypes.INTEGER,
+        allowNull: false
       },
       createdAt: {
         allowNull: false,
@@ -46,7 +50,7 @@ module.exports = {
       }
     })
   },
-  down: async (queryInterface, DataTypes) => {
-    await queryInterface.dropTable('payment_entities')
+  async down(queryInterface, DataTypes) {
+    await queryInterface.dropTable('fees')
   }
 }

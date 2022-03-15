@@ -9,7 +9,6 @@ module.exports = (sequelize, DataTypes) => {
     toJSON() {
       return {
         ...this.get(),
-        id: undefined,
         customerId: undefined,
         number: undefined
       }
@@ -18,7 +17,6 @@ module.exports = (sequelize, DataTypes) => {
 
   PaymentEntity.init(
     {
-      uuid: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4 },
       issuer: {
         type: DataTypes.STRING,
         allowNull: false,
@@ -32,14 +30,15 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
         validate: {
           notNull: {
-            msg: 'Please enter a payment entity type (credit-card, debit-card)'
+            msg: 'Please enter a payment entity type (credit-card, debit-card, bank-account, ussd)'
           },
           notEmpty: { msg: 'Payment entity type cannot be blank' }
         }
       },
       brand: {
         type: DataTypes.STRING,
-        defaultValue: DataTypes.STRING
+        isUppercase: true,
+        defaultValue: '*'
       },
       country: {
         type: DataTypes.STRING,
