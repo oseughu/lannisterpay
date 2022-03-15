@@ -114,7 +114,7 @@ app.post(
   '/add-payment-method',
   // passport.authenticate('jwt', { session: false }),
   async (req, res) => {
-    const { customerUuid, issuer, type, brand, country, number, six_id } =
+    const { customerUuid, issuer, type, brand, country, number, sixId } =
       req.body
 
     try {
@@ -128,7 +128,7 @@ app.post(
         brand, //optional
         country,
         number, //credit card or phone number
-        six_id //last six digits of credit card, can be null for phone number
+        six_id: sixId //last six digits of credit card, can be null for phone number
       })
       await paymentEntity.save()
       return res.json(paymentEntity)
