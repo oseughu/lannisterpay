@@ -257,7 +257,7 @@ app.post(
 
       return res.json({
         AppliedFeeID: feeConfig.fee_id,
-        AppliedFeeValue: appliedFee,
+        AppliedFeeValue: appliedFee(),
         ChargeAmount,
         SettlementAmount: ChargeAmount - appliedFee
       })
