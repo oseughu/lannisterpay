@@ -157,18 +157,27 @@ app.post(
     } = req.body
 
     try {
-      const fee = new Fee({
-        fee_id: feeId,
-        fee_locale: feeLocale,
-        fee_currency: feeCurrency,
-        fee_entity: feeEntity,
-        entity_property: entityProperty,
-        fee_type: feeType,
-        fee_flat: feeFlat,
-        fee_value: feeValue
-      })
-      await fee.save()
-      return res.json(fee)
+      const alreadyExists = await Fee.findOne({ where: { fee_id: feeId } })
+
+      if (alreadyExists) {
+        return res.status(400).json({
+          Error:
+            'A fee config with that ID already exists. You might want to rename it.'
+        })
+      } else {
+        const fee = new Fee({
+          fee_id: feeId,
+          fee_locale: feeLocale,
+          fee_currency: feeCurrency,
+          fee_entity: feeEntity,
+          entity_property: entityProperty,
+          fee_type: feeType,
+          fee_flat: feeFlat,
+          fee_value: feeValue
+        })
+        await fee.save()
+        return res.json(fee)
+      }
     } catch (err) {
       console.log(err)
       return res.status(500).json(err)
