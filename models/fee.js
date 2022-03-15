@@ -20,12 +20,6 @@ module.exports = (sequelize, DataTypes) => {
   }
   Fee.init(
     {
-      id: {
-        allowNull: false,
-        autoIncrement: true,
-        primaryKey: true,
-        type: DataTypes.INTEGER
-      },
       fee_id: {
         type: DataTypes.STRING,
         allowNull: false,
@@ -52,7 +46,7 @@ module.exports = (sequelize, DataTypes) => {
         validate: {
           notNull: { msg: 'Please enter the fee currency (NGN, USD)' },
           notEmpty: { msg: 'fee currency cannot be blank' },
-          isUppercase: true,
+          isUppercase: { msg: 'Currency should be in uppercase letters' },
           len: [3, 3]
         }
       },
@@ -64,12 +58,12 @@ module.exports = (sequelize, DataTypes) => {
             msg: 'Please enter a fee entity (CREDIT-CARD, DEBIT-CARD, BANK-ACCOUNT, USSD)'
           },
           notEmpty: { msg: 'Fee entity cannot be blank' },
-          isUppercase: true
+          isUppercase: { msg: 'Fee entity should be in uppercase letters' }
         }
       },
       entity_property: {
         type: DataTypes.STRING,
-        isUppercase: true,
+        isUppercase: { msg: 'Entity property should be in uppercase letters' },
         defaultValue: '*'
       },
       fee_type: {

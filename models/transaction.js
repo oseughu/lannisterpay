@@ -39,6 +39,7 @@ module.exports = (sequelize, DataTypes) => {
         validate: {
           notNull: { msg: 'Please enter a currency' },
           notEmpty: { msg: 'Currency field cannot be blank' },
+          isUppercase: { msg: 'Currency should be in uppercase letters' },
           len: [3, 3]
         }
       }
