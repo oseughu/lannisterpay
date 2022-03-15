@@ -37,7 +37,7 @@ module.exports = {
         defaultValue: 0
       },
       fee_value: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.DECIMAL,
         allowNull: false
       },
       createdAt: {

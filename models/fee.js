@@ -71,15 +71,15 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
         validate: {
           notNull: {
-            msg: 'Please enter a fee type (flat perc, or flat_perc)'
+            msg: 'Please enter a fee type (FLAT, PERC, OR FLAT PERC)'
           },
           notEmpty: { msg: 'Fee type cannot be blank' },
-          isIn: [['flat', 'perc', 'flat perc']]
+          isIn: [['FLAT', 'PERC', 'FLAT PERC']]
         }
       },
       fee_flat: { type: DataTypes.INTEGER, defaultValue: 0 },
       fee_value: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.DECIMAL,
         allowNull: false,
         validate: {
           notNull: { msg: 'Please enter a fee value' },

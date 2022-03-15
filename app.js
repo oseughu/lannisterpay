@@ -234,11 +234,11 @@ app.post(
       await transaction.save()
 
       const appliedFee = () => {
-        if (_.lowerCase(feeConfig.fee_type) === 'flat') {
+        if (_.toUpper(feeConfig.fee_type) === 'FLAT') {
           return transaction.amount + feeConfig.fee_flat
-        } else if (_.lowerCase(feeConfig.fee_type) === 'perc') {
+        } else if (_.toUpper(feeConfig.fee_type) === 'PERC') {
           return (feeConfig.fee_value * transaction.amount) / 100
-        } else if (_.lowerCase(feeConfig.fee_type) === 'flat perc') {
+        } else if (_.toUpper(feeConfig.fee_type) === 'FLAT PERC') {
           return (
             feeConfig.fee_flat +
             (feeConfig.fee_value * transaction.amount) / 100
