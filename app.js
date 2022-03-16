@@ -107,7 +107,7 @@ app.get(
 
       return res.json(customer)
     } catch (error) {
-      //console.log(err)
+      //console.log(error)
       return res.status(500).json({ error: 'User not found.' })
     }
   }
@@ -136,7 +136,7 @@ app.post(
       await paymentEntity.save()
       return res.json(paymentEntity)
     } catch (error) {
-      // console.log(err)
+      // console.log(error)
       return res.status(500).json(error)
     }
   }
@@ -180,7 +180,7 @@ app.post(
         return res.json(fee)
       }
     } catch (error) {
-      //console.log(err)
+      //console.log(error)
       return res.status(500).json(error)
     }
   }
@@ -229,11 +229,10 @@ app.post(
         }
       })
 
-      if (!feeConfig) {
-        return res.status(400).json({
+      !feeConfig &&
+        res.status(400).json({
           error: 'No valid configuration exists for this payment entity.'
         })
-      }
 
       const transaction = new Transaction({
         paymentEntityId: paymentMethod.id,
@@ -267,7 +266,7 @@ app.post(
         SettlementAmount: chargeAmount() - appliedFee()
       })
     } catch (error) {
-      //console.log(err)
+      //console.log(error)
       return res.status(500).json(error)
     }
   }
@@ -289,7 +288,7 @@ app.get(
       })
       return res.json(transactions)
     } catch (error) {
-      //console.log(err)
+      //console.log(error)
       return res.status(500).json({
         error: 'No transactions for this user or user does not exist.'
       })
