@@ -162,7 +162,7 @@ app.post(
       if (alreadyExists) {
         return res.status(400).json({
           Error:
-            'A fee config with that ID already exists. You might want to rename it.'
+            'A fee config with that ID already exists. Please rename it and try again.'
         })
       } else {
         const fee = new Fee({
