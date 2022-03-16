@@ -1,6 +1,7 @@
 //Require all the necessary modules
 require('dotenv').config()
 var _ = require('lodash')
+const compression = require('compression')
 const express = require('express')
 const app = express()
 const session = require('express-session')
@@ -21,16 +22,17 @@ const {
 
 const { Op } = require('@sequelize/core')
 
+app.use(compression())
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
 
-app.use(
-  session({
-    secret: process.env.SECRET,
-    resave: false,
-    saveUninitialized: true
-  })
-)
+// app.use(
+//   session({
+//     secret: process.env.SECRET,
+//     resave: false,
+//     saveUninitialized: true
+//   })
+// )
 
 app.post('/register', async (req, res) => {
   const { fullName, email, password, bearsFee } = req.body
@@ -52,7 +54,7 @@ app.post('/register', async (req, res) => {
       })
     }
   } catch (error) {
-    console.log(error)
+    //console.log(error)
     return res.status(500).json(error)
   }
 })
@@ -106,7 +108,7 @@ app.get(
 
       return res.json(customer)
     } catch (err) {
-      console.log(err)
+      //console.log(err)
       return res.status(500).json({ Error: 'Something went wrong.' })
     }
   }
@@ -135,7 +137,7 @@ app.post(
       await paymentEntity.save()
       return res.json(paymentEntity)
     } catch (err) {
-      console.log(err)
+      // console.log(err)
       return res.status(500).json(err)
     }
   }
@@ -179,7 +181,7 @@ app.post(
         return res.json(fee)
       }
     } catch (err) {
-      console.log(err)
+      //console.log(err)
       return res.status(500).json(err)
     }
   }
@@ -255,7 +257,7 @@ app.post(
         SettlementAmount: chargeAmount() - appliedFee()
       })
     } catch (err) {
-      console.log(err)
+      //console.log(err)
       return res.status(500).json(err)
     }
   }
@@ -277,14 +279,14 @@ app.get(
       })
       return res.json(transactions)
     } catch (err) {
-      console.log(err)
+      //console.log(err)
       return res.status(500).json({ error: 'Something went wrong.' })
     }
   }
 )
 
 app.listen(port, async () => {
-  console.log('Server started successfully!')
+  //console.log('Server started successfully!')
   await sequelize.authenticate()
-  console.log('Database connected!')
+  //console.log('Database connected!')
 })

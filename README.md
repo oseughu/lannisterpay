@@ -2,6 +2,8 @@
 
 This api was built to compute transaction fees using specific configurations. Built with Node, Express, MySQL2, and Sequelize. Hosted on Heroku and Clever Cloud.
 
+NB: All request fields labelled optional (that you don't intend to fill) should be excluded from the request altogether, not left null or empty.
+
 ## Please start by signing up with the following details in the request:
 
 https://lannpay.herokuapp.com/register
