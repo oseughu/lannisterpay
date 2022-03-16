@@ -7,8 +7,8 @@ const app = express()
 const port = process.env.PORT || 3000
 //const passport = require('passport')
 //const jwt = require('jsonwebtoken')
-const bcrypt = require('bcrypt')
-const saltRounds = 10
+// const bcrypt = require('bcrypt')
+// const saltRounds = 10
 //require('./auth/passport')
 
 const {
@@ -34,23 +34,22 @@ app.use(express.json())
 // )
 
 app.post('/register', async (req, res) => {
-  const { fullName, email, password, bearsFee } = req.body
+  const { fullName, email, /*password,*/ bearsFee } = req.body
 
   try {
     const alreadyExists = await Customer.findOne({ where: { email } })
     if (alreadyExists) {
       return res.status(400).json({ error: 'User already exists.' })
     } else {
-      bcrypt.hash(password, saltRounds, (err, hash) => {
-        const newUser = new Customer({
-          full_name: fullName,
-          email,
-          password: hash,
-          bears_fee: bearsFee
-        })
-        newUser.save()
-        return res.json(newUser)
+      // bcrypt.hash(password, saltRounds, (err, hash) => {
+      const newUser = new Customer({
+        full_name: fullName,
+        email,
+        bears_fee: bearsFee
       })
+      newUser.save()
+      return res.json(newUser)
+      //})
     }
   } catch (error) {
     //console.log(error)
@@ -93,25 +92,25 @@ app.post('/register', async (req, res) => {
 //   }
 // })
 
-app.get(
-  '/customer/:uuid',
-  //passport.authenticate('jwt', { session: false }),
-  async (req, res) => {
-    const uuid = req.params.uuid
+// app.get(
+//   '/customer/:uuid',
+//   //passport.authenticate('jwt', { session: false }),
+//   async (req, res) => {
+//     const uuid = req.params.uuid
 
-    try {
-      const customer = await Customer.findOne({
-        where: { uuid },
-        include: ['transactions', 'payment_entities']
-      })
+//     try {
+//       const customer = await Customer.findOne({
+//         where: { uuid },
+//         include: ['transactions', 'payment_entities']
+//       })
 
-      return res.json(customer)
-    } catch (error) {
-      //console.log(error)
-      return res.status(500).json({ error: 'User not found.' })
-    }
-  }
-)
+//       return res.json(customer)
+//     } catch (error) {
+//       //console.log(error)
+//       return res.status(500).json({ error: 'User not found.' })
+//     }
+//   }
+// )
 
 app.post(
   '/add-payment-method',
