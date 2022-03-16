@@ -10,7 +10,6 @@ https://lannpay.herokuapp.com/register
 
 - fullName
 - email
-- password
 - bearsFee (true or false)
 
 Please copy your unique user identifier (uuid) and keep it handy as you cannot add a payment entity or make a transaction without it. If you lose it, just sign up again with a different email, it doesn't have to be a real one, just valid email syntax.
