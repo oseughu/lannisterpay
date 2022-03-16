@@ -17,10 +17,10 @@ module.exports = {
         type: DataTypes.STRING,
         allowNull: false
       },
-      password: {
-        type: DataTypes.STRING,
-        allowNull: false
-      },
+      // password: {
+      //   type: DataTypes.STRING,
+      //   allowNull: false
+      // },
       bears_fee: {
         type: DataTypes.BOOLEAN,
         allowNull: false

@@ -16,8 +16,8 @@ module.exports = (sequelize, DataTypes) => {
     toJSON() {
       return {
         ...this.get(),
-        id: undefined,
-        password: undefined
+        id: undefined
+        // password: undefined
       }
     }
   }
@@ -41,15 +41,15 @@ module.exports = (sequelize, DataTypes) => {
           isEmail: { msg: 'Please enter a valid email address' }
         }
       },
-      password: {
-        type: DataTypes.STRING,
-        allowNull: false,
-        validate: {
-          notNull: { msg: 'User must have a password' },
-          notEmpty: { msg: 'Password cannot be empty' },
-          min: 8
-        }
-      },
+      // password: {
+      //   type: DataTypes.STRING,
+      //   allowNull: false,
+      //   validate: {
+      //     notNull: { msg: 'User must have a password' },
+      //     notEmpty: { msg: 'Password cannot be empty' },
+      //     min: 8
+      //   }
+      // },
       bears_fee: {
         type: DataTypes.BOOLEAN,
         allowNull: false,
