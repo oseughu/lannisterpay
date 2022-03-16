@@ -154,8 +154,8 @@ app.post(
       feeEntity, //CREDIT-CARD, DEBIT-CARD, BANK-ACCOUNT, USSD
       entityProperty, //optional, MASTERCARD, VISA, MTN, GTBANK
       feeType, //FLAT, PERC OR FLAT PERC
-      feeFlat, //optional, default is 0
-      feeValue
+      feeFlat, //optional, flat amount to be added if feeType is FLAT
+      feeValue //amount to be charged for the transaction fee, can be decimal
     } = req.body
 
     try {
