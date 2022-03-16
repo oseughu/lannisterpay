@@ -33,12 +33,8 @@ module.exports = (sequelize, DataTypes) => {
       },
       fee_locale: {
         type: DataTypes.STRING,
-        allowNull: false,
-        validate: {
-          notNull: { msg: 'Please enter the fee locale (LOCL or INTL)' },
-          notEmpty: { msg: 'fee locale cannot be blank' },
-          isIn: [['LOCL', 'INTL']]
-        }
+        defaultValue: '*',
+        isIn: [['LOCL', 'INTL']]
       },
       fee_currency: {
         type: DataTypes.STRING,
@@ -52,14 +48,8 @@ module.exports = (sequelize, DataTypes) => {
       },
       fee_entity: {
         type: DataTypes.STRING,
-        allowNull: false,
-        validate: {
-          notNull: {
-            msg: 'Please enter a fee entity (CREDIT-CARD, DEBIT-CARD, BANK-ACCOUNT, USSD)'
-          },
-          notEmpty: { msg: 'Fee entity cannot be blank' },
-          isUppercase: { msg: 'Fee entity should be in uppercase letters' }
-        }
+        defaultValue: '*',
+        isUppercase: { msg: 'Fee entity should be in uppercase letters' }
       },
       entity_property: {
         type: DataTypes.STRING,

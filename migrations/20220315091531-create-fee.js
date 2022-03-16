@@ -14,7 +14,7 @@ module.exports = {
       },
       fee_locale: {
         type: DataTypes.STRING,
-        allowNull: false
+        defaultValue: '*'
       },
       fee_currency: {
         type: DataTypes.STRING,
@@ -22,7 +22,7 @@ module.exports = {
       },
       fee_entity: {
         type: DataTypes.STRING,
-        allowNull: false
+        defaultValue: '*'
       },
       entity_property: {
         type: DataTypes.STRING,

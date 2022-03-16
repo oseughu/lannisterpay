@@ -148,9 +148,9 @@ app.post(
   async (req, res) => {
     const {
       feeId,
-      feeLocale,
+      feeLocale, //optional, LOCL or INTL
       feeCurrency,
-      feeEntity, //CREDIT-CARD, DEBIT-CARD, BANK-ACCOUNT, USSD
+      feeEntity, //optional, CREDIT-CARD, DEBIT-CARD, BANK-ACCOUNT, USSD
       entityProperty, //optional, MASTERCARD, VISA, MTN, GTBANK
       feeType, //FLAT, PERC OR FLAT PERC
       feeFlat, //optional, flat amount to be added if feeType is FLAT or FLAT PERC
@@ -212,6 +212,17 @@ app.post(
             {
               fee_currency: currency,
               fee_entity: _.toUpper(_.kebabCase(paymentMethod.type)),
+              entity_property: '*'
+            },
+            {
+              fee_currency: currency,
+              fee_entity: '*',
+              entity_property: '*'
+            },
+            {
+              fee_currency: currency,
+              fee_locale: '*',
+              fee_entity: '*',
               entity_property: '*'
             }
           ]
