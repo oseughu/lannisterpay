@@ -2,7 +2,7 @@
 
 This api was built to compute transaction fees using specific configurations. Built with Node, Express, MySQL2, and Sequelize. Hosted on Heroku and Clever Cloud.
 
-NB: All request fields labelled optional (that you don't intend to fill) should be excluded from the request altogether, not left null or empty.
+NB: All request fields labelled optional (that you don't intend to fill) should be excluded from the request altogether, not left blank.
 
 ## Please start by signing up with the following details in the request:
 
@@ -33,13 +33,13 @@ the uuid for each payment entity is returned after it has been added successfull
 
 https://lannpay.herokuapp.com/fees
 
-- feeId (8 alphanumeric characters in the format "LNPY\*\*\*\*")
+- feeId (8 alphanumeric characters in the format "LNPY1234")
 - feeLocale (LOCL or INTL)
 - feeCurrency (NGN, USD, GBP)
 - feeEntity (CREDIT-CARD, DEBIT-CARD, BANK-ACCOUNT, USSD)
 - entityProperty (optional, MASTERCARD, VISA, MTN, GTBANK)
 - feeType (FLAT, PERC OR FLAT PERC)
-- feeFlat (optional, flat amount to be added if feeType is FLAT)
+- feeFlat (optional, flat amount to be added if feeType is FLAT or FLAT PERC)
 - feeValue (amount to be charged for the transaction fee, can be decimal)
 
 ## And finally, to compute your transaction fee, you only need three fields:

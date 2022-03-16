@@ -39,7 +39,7 @@ app.post('/register', async (req, res) => {
   try {
     const alreadyExists = await Customer.findOne({ where: { email } })
     if (alreadyExists) {
-      return res.status(400).json({ Error: 'User already exists.' })
+      return res.status(400).json({ error: 'User already exists.' })
     } else {
       bcrypt.hash(password, saltRounds, (err, hash) => {
         const newUser = new Customer({
@@ -106,9 +106,9 @@ app.get(
       })
 
       return res.json(customer)
-    } catch (err) {
+    } catch (error) {
       //console.log(err)
-      return res.status(500).json({ Error: 'Something went wrong.' })
+      return res.status(500).json({ error: 'User not found.' })
     }
   }
 )
@@ -135,9 +135,9 @@ app.post(
       })
       await paymentEntity.save()
       return res.json(paymentEntity)
-    } catch (err) {
+    } catch (error) {
       // console.log(err)
-      return res.status(500).json(err)
+      return res.status(500).json(error)
     }
   }
 )
@@ -153,7 +153,7 @@ app.post(
       feeEntity, //CREDIT-CARD, DEBIT-CARD, BANK-ACCOUNT, USSD
       entityProperty, //optional, MASTERCARD, VISA, MTN, GTBANK
       feeType, //FLAT, PERC OR FLAT PERC
-      feeFlat, //optional, flat amount to be added if feeType is FLAT
+      feeFlat, //optional, flat amount to be added if feeType is FLAT or FLAT PERC
       feeValue //amount to be charged for the transaction fee, can be decimal
     } = req.body
 
@@ -179,9 +179,9 @@ app.post(
         await fee.save()
         return res.json(fee)
       }
-    } catch (err) {
+    } catch (error) {
       //console.log(err)
-      return res.status(500).json(err)
+      return res.status(500).json(error)
     }
   }
 )
@@ -220,7 +220,7 @@ app.post(
 
       if (!feeConfig) {
         return res.status(400).json({
-          Error: 'No valid configuration exists for this payment entity.'
+          error: 'No valid configuration exists for this payment entity.'
         })
       }
 
@@ -255,9 +255,9 @@ app.post(
         ChargeAmount: chargeAmount(),
         SettlementAmount: chargeAmount() - appliedFee()
       })
-    } catch (err) {
+    } catch (error) {
       //console.log(err)
-      return res.status(500).json(err)
+      return res.status(500).json(error)
     }
   }
 )
@@ -277,9 +277,11 @@ app.get(
         include: ['payment_method']
       })
       return res.json(transactions)
-    } catch (err) {
+    } catch (error) {
       //console.log(err)
-      return res.status(500).json({ error: 'Something went wrong.' })
+      return res.status(500).json({
+        error: 'No transactions for this user or user does not exist.'
+      })
     }
   }
 )
