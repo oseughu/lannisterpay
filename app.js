@@ -4,10 +4,9 @@ var _ = require('lodash')
 const compression = require('compression')
 const express = require('express')
 const app = express()
-const session = require('express-session')
 const port = process.env.PORT || 3000
-const passport = require('passport')
-const jwt = require('jsonwebtoken')
+//const passport = require('passport')
+//const jwt = require('jsonwebtoken')
 const bcrypt = require('bcrypt')
 const saltRounds = 10
 require('./auth/passport')
