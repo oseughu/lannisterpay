@@ -216,7 +216,8 @@ app.post(
             },
             {
               fee_currency: currency,
-              fee_entity: '*',
+              fee_locale: '*',
+              fee_entity: _.toUpper(_.kebabCase(paymentMethod.type)),
               entity_property: '*'
             },
             {
