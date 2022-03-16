@@ -9,7 +9,7 @@ const port = process.env.PORT || 3000
 //const jwt = require('jsonwebtoken')
 const bcrypt = require('bcrypt')
 const saltRounds = 10
-require('./auth/passport')
+//require('./auth/passport')
 
 const {
   sequelize,
