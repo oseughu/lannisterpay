@@ -53,8 +53,10 @@ module.exports = (sequelize, DataTypes) => {
       number: {
         type: DataTypes.BIGINT,
         validate: {
-          isNumeric: { msg: 'Please enter a valid 16-digit card number' },
-          len: [16, 16]
+          isNumeric: {
+            msg: 'Please enter a valid 16-digit card number, 11-digit phone number or 10-digit bank account number'
+          },
+          len: [10, 16]
         }
       },
       six_id: {
