@@ -7,8 +7,8 @@ const app = express()
 const port = process.env.PORT || 3000
 //const passport = require('passport')
 //const jwt = require('jsonwebtoken')
-// const bcrypt = require('bcrypt')
-// const saltRounds = 10
+//const bcrypt = require('bcrypt')
+//const saltRounds = 10
 //require('./auth/passport')
 
 const {

@@ -38,7 +38,7 @@ module.exports = {
       },
       fee_value: {
         type: DataTypes.DECIMAL,
-        allowNull: false
+        defaultValue: 0
       },
       createdAt: {
         allowNull: false,
