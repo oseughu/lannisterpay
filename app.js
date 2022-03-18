@@ -201,28 +201,22 @@ app.post(
         where: { id: paymentMethod.customerId }
       })
 
+      const locale = () => (currencyCountry === 'NG' ? 'LOCL' : 'INTL')
+      const property = () =>
+        paymentMethod.brand === '' ? paymentMethod.issuer : paymentMethod.brand
+
       const feeConfig = await Fee.findOne({
         where: {
-          [Op.or]: [
-            {
-              entity_property: {
-                [Op.or]: [paymentMethod.brand, '*']
-              },
-              fee_entity: {
-                [Op.or]: [paymentMethod.type, '*']
-              },
-              fee_currency: currency
-            },
-            {
-              entity_property: {
-                [Op.or]: [paymentMethod.issuer, '*']
-              },
-              fee_entity: {
-                [Op.or]: [paymentMethod.type, '*']
-              },
-              fee_currency: currency
-            }
-          ]
+          fee_currency: currency,
+          fee_locale: {
+            [Op.or]: [locale(), '*']
+          },
+          fee_entity: {
+            [Op.or]: [paymentMethod.type, '*']
+          },
+          entity_property: {
+            [Op.or]: [property(), '*']
+          }
         }
       })
 
