@@ -19,8 +19,6 @@ const {
   Fee
 } = require('./models')
 
-const { Op } = require('@sequelize/core')
-
 app.use(compression())
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
@@ -190,6 +188,9 @@ app.post(
   //passport.authenticate('jwt', { session: false }),
   async (req, res) => {
     const { paymentEntityUuid, amount, currency, currencyCountry } = req.body
+    let property
+    let locale
+    let type
 
     try {
       const paymentMethod = await PaymentEntity.findOne({
@@ -200,20 +201,36 @@ app.post(
         where: { id: paymentMethod.customerId }
       })
 
-      const locale = currencyCountry === 'NG' ? 'LOCL' : 'INTL'
-      const property =
-        paymentMethod.brand === '' ? paymentMethod.issuer : paymentMethod.brand
+      if (paymentMethod.brand === null && paymentMethod.issuer === null) {
+        property = '*'
+      } else if (paymentMethod.brand === null) {
+        property = paymentMethod.issuer
+      } else {
+        property = paymentMethod.brand
+      }
+
+      if (paymentMethod.country === null) {
+        locale = '*'
+      } else if (paymentMethod.country === currencyCountry) {
+        locale = 'LOCL'
+      } else {
+        locale = 'INTL'
+      }
+
+      if (paymentMethod.type === null) {
+        type = '*'
+      } else {
+        type = _.toUpper(_.kebabCase(paymentMethod.type))
+      }
 
       const feeConfig = await Fee.findOne({
         where: {
           fee_currency: currency,
           fee_locale: locale,
-          fee_entity: paymentMethod.type,
+          fee_entity: type,
           entity_property: property
         }
       })
-
-      console.log(feeConfig)
 
       !feeConfig &&
         res.status(400).json({
