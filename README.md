@@ -19,10 +19,10 @@ Please copy your unique user identifier (uuid) and keep it handy as you cannot a
 https://lannpay.herokuapp.com/add-payment-method
 
 - customerUuid (your uuid)
-- issuer (GTBANK, MTN)
-- type (CREDIT-CARD, DEBIT-CARD, USSD)
+- issuer (optional, GTBANK, MTN)
+- type (optional, CREDIT-CARD, DEBIT-CARD, USSD)
 - brand (optional, MASTERCARD, VISA)
-- country (NG, US, UK)
+- country (optional, NG, US, UK)
 - number (credit card or phone number)
 - sixId (last six digits of credit/debit card)
 
@@ -33,13 +33,13 @@ the uuid for each payment entity is returned after it has been added successfull
 https://lannpay.herokuapp.com/fees
 
 - feeId (8 alphanumeric characters in the format "LNPY1234")
-- feeLocale (LOCL or INTL)
+- feeLocale (optional, LOCL or INTL)
 - feeCurrency (NGN, USD, GBP)
-- feeEntity (CREDIT-CARD, DEBIT-CARD, BANK-ACCOUNT, USSD)
+- feeEntity (optional, CREDIT-CARD, DEBIT-CARD, BANK-ACCOUNT, USSD)
 - entityProperty (optional, MASTERCARD, VISA, MTN, GTBANK)
 - feeType (FLAT, PERC OR FLAT PERC)
 - feeFlat (optional, flat amount to be added if feeType is FLAT or FLAT PERC)
-- feeValue (amount to be charged for the transaction fee, can be decimal)
+- feeValue (optional, amount to be charged for the transaction fee, can be decimal)
 
 ## And finally, to compute your transaction fee, you only need three fields:
 
@@ -48,3 +48,4 @@ https://lannpay.herokuapp.com/compute-transaction-fee
 - paymentEntityUuid (uuid for your preferred payment method, this is different from the user uuid so be careful.)
 - amount (cost of the transaction)
 - currency (NGN, USD, GBP)
+- currencyCountry (NG, US etc)

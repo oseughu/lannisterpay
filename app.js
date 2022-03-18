@@ -1,15 +1,9 @@
-//Require all the necessary modules
 require('dotenv').config()
 var _ = require('lodash')
 const compression = require('compression')
 const express = require('express')
 const app = express()
 const port = process.env.PORT || 3000
-//const passport = require('passport')
-//const jwt = require('jsonwebtoken')
-//const bcrypt = require('bcrypt')
-//const saltRounds = 10
-//require('./auth/passport')
 
 const {
   sequelize,
@@ -22,14 +16,6 @@ const {
 app.use(compression())
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
-
-// app.use(
-//   session({
-//     secret: process.env.SECRET,
-//     resave: false,
-//     saveUninitialized: true
-//   })
-// )
 
 app.post('/register', async (req, res) => {
   const { fullName, email, /*password,*/ bearsFee } = req.body
@@ -54,61 +40,6 @@ app.post('/register', async (req, res) => {
     return res.status(500).json(error)
   }
 })
-
-// app.post('/login', async (req, res) => {
-//   const { email, password } = req.body
-
-//   const customer = await Customer.findOne({ where: { email } })
-
-//   try {
-//     if (customer) {
-//       bcrypt.compare(password, customer.password, (err, result) => {
-//         if (result) {
-//           jwt.sign(
-//             { id: customer.id, email: customer.email },
-//             process.env.SECRET
-//           )
-
-//           return res.json({
-//             msg: 'Welcome to Lannister Pay!!'
-//             // token: jwtToken
-//           })
-//         } else {
-//           return res
-//             .status(400)
-//             .json({ Error: 'Email or password does not match!' })
-//         }
-//       })
-//     } else {
-//       return res
-//         .status(400)
-//         .json({ Error: 'Email or password does not match!' })
-//     }
-//   } catch (error) {
-//     console.log(error)
-//     return res.status(500).json(error)
-//   }
-// })
-
-// app.get(
-//   '/customer/:uuid',
-//   //passport.authenticate('jwt', { session: false }),
-//   async (req, res) => {
-//     const uuid = req.params.uuid
-
-//     try {
-//       const customer = await Customer.findOne({
-//         where: { uuid },
-//         include: ['transactions', 'payment_entities']
-//       })
-
-//       return res.json(customer)
-//     } catch (error) {
-//       //console.log(error)
-//       return res.status(500).json({ error: 'User not found.' })
-//     }
-//   }
-// )
 
 app.post(
   '/add-payment-method',
@@ -192,6 +123,8 @@ app.post(
     let locale
     let type
     let property
+    let value
+    let finalAmount
 
     try {
       const paymentMethod = await PaymentEntity.findOne({
@@ -218,10 +151,10 @@ app.post(
 
       if (paymentMethod.brand === null && paymentMethod.issuer === null) {
         property = '*'
-      } else if (paymentMethod.brand === null) {
-        property = _.upperCase(paymentMethod.issuer)
-      } else {
+      } else if (paymentMethod.brand !== null) {
         property = _.upperCase(paymentMethod.brand)
+      } else {
+        property = '*'
       }
 
       const feeConfig = await Fee.findOne({
@@ -246,35 +179,34 @@ app.post(
       })
       await transaction.save()
 
-      const appliedFee = () => {
-        if (_.upperCase(feeConfig.fee_type) === 'FLAT') {
-          return +(
-            parseFloat(transaction.amount) + parseFloat(feeConfig.fee_flat)
-          ).toFixed(2)
-        } else if (_.upperCase(feeConfig.fee_type) === 'PERC') {
-          return +(
-            (parseFloat(feeConfig.fee_value) * parseFloat(transaction.amount)) /
+      if (_.upperCase(feeConfig.fee_type) === 'FLAT') {
+        value = +parseFloat(feeConfig.fee_flat).toFixed(2)
+        return +(
+          parseFloat(transaction.amount) + parseFloat(feeConfig.fee_flat)
+        ).toFixed(2)
+      } else if (_.upperCase(feeConfig.fee_type) === 'PERC') {
+        value = +(
+          (parseFloat(feeConfig.fee_value) * parseFloat(transaction.amount)) /
+          100
+        ).toFixed(2)
+      } else if (_.upperCase(feeConfig.fee_type) === 'FLAT PERC') {
+        value = +(
+          parseFloat(feeConfig.fee_flat) +
+          (parseFloat(feeConfig.fee_value) * parseFloat(transaction.amount)) /
             100
-          ).toFixed(2)
-        } else if (_.upperCase(feeConfig.fee_type) === 'FLAT PERC') {
-          return +(
-            parseFloat(feeConfig.fee_flat) +
-            (parseFloat(feeConfig.fee_value) * parseFloat(transaction.amount)) /
-              100
-          ).toFixed(2)
-        }
+        ).toFixed(2)
       }
 
       const chargeAmount = () =>
         customer.bears_fee
-          ? parseFloat(transaction.amount) + parseFloat(appliedFee())
+          ? parseFloat(transaction.amount) + parseFloat(value)
           : parseFloat(transaction.amount)
 
       return res.json({
         AppliedFeeID: feeConfig.fee_id,
-        AppliedFeeValue: appliedFee(),
+        AppliedFeeValue: value,
         ChargeAmount: chargeAmount(),
-        SettlementAmount: chargeAmount() - appliedFee()
+        SettlementAmount: chargeAmount() - value
       })
     } catch (error) {
       //console.log(error)
@@ -282,30 +214,6 @@ app.post(
     }
   }
 )
-
-// app.get(
-//   '/:uuid/transactions',
-//   //passport.authenticate('jwt', { session: false }),
-//   async (req, res) => {
-//     const customerUuid = req.params.uuid
-
-//     try {
-//       const customer = await Customer.findOne({
-//         where: { uuid: customerUuid }
-//       })
-//       const transactions = await Transaction.findAll({
-//         where: { customerId: customer.id },
-//         include: ['payment_method']
-//       })
-//       return res.json(transactions)
-//     } catch (error) {
-//       //console.log(error)
-//       return res.status(500).json({
-//         error: 'No transactions for this user or user does not exist.'
-//       })
-//     }
-//   }
-// )
 
 app.listen(port, async () => {
   //console.log('Server started successfully!')
