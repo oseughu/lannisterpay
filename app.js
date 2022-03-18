@@ -201,34 +201,18 @@ app.post(
       })
 
       const feeConfig = await Fee.findOne({
-        //{
-        where:
-          //[Op.or]: [
-          {
-            fee_currency: currency,
-            fee_locale: {
-              [Op.or]: ['LOCL', 'INTL', '*']
-            },
-            fee_entity: {
-              [Op.or]: [_.toUpper(_.kebabCase(paymentMethod.type)), '*']
-            },
-            entity_property: {
-              [Op.or]: [paymentMethod.issuer, paymentMethod.brand, '*']
-            }
+        where: {
+          fee_currency: currency,
+          fee_locale: {
+            [Op.or]: ['LOCL', 'INTL', '*']
+          },
+          fee_entity: {
+            [Op.or]: [_.toUpper(_.kebabCase(paymentMethod.type)), '*']
+          },
+          entity_property: {
+            [Op.or]: [paymentMethod.issuer, paymentMethod.brand, '*']
           }
-        // {
-        //   fee_currency: currency,
-        //   fee_entity: _.toUpper(_.kebabCase(paymentMethod.type)),
-        //   entity_property: paymentMethod.brand
-        // },
-        // {
-        //   fee_currency: currency,
-        //   fee_locale: '*',
-        //   fee_entity: '*',
-        //   entity_property: '*'
-        // }
-        //]
-        //}
+        }
       })
 
       !feeConfig &&
