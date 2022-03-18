@@ -200,12 +200,6 @@ app.post(
         where: { id: paymentMethod.customerId }
       })
 
-      let payIssuer = {
-        fee_currency: currency,
-        fee_entity: _.toUpper(_.kebabCase(paymentMethod.type)),
-        entity_property: paymentMethod.issuer
-      }
-
       const feeConfig = await Fee.findOne({
         //{
         where:
