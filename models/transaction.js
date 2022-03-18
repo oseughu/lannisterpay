@@ -12,25 +12,20 @@ module.exports = (sequelize, DataTypes) => {
     toJSON() {
       return {
         ...this.get(),
-        customerId: undefined
+        paymentEntityId: undefined
       }
     }
   }
+
   Transaction.init(
     {
-      id: {
-        allowNull: false,
-        autoIncrement: true,
-        primaryKey: true,
-        type: DataTypes.INTEGER
-      },
+      uuid: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4 },
       amount: {
-        type: DataTypes.DECIMAL(10, 2),
+        type: DataTypes.FLOAT,
         allowNull: false,
         validate: {
           notNull: { msg: 'Please enter an amount for this transaction' },
-          notEmpty: { msg: 'Amount cannot be blank' },
-          isNumeric: { msg: 'Please enter a valid amount' }
+          notEmpty: { msg: 'Amount cannot be blank' }
         }
       },
       currency: {
@@ -41,6 +36,18 @@ module.exports = (sequelize, DataTypes) => {
           notEmpty: { msg: 'Currency field cannot be blank' },
           isUppercase: { msg: 'Currency should be in uppercase letters' },
           len: [3, 3]
+        }
+      },
+      currency_country: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        validate: {
+          notNull: { msg: 'Please enter a country' },
+          notEmpty: { msg: 'Currency country field cannot be blank' },
+          isUppercase: {
+            msg: 'Currency country should be in uppercase letters'
+          },
+          len: [2, 3]
         }
       }
     },

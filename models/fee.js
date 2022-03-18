@@ -49,12 +49,16 @@ module.exports = (sequelize, DataTypes) => {
       fee_entity: {
         type: DataTypes.STRING,
         defaultValue: '*',
-        isUppercase: { msg: 'Fee entity should be in uppercase letters' }
+        validate: {
+          isUppercase: { msg: 'Fee entity should be in uppercase letters' }
+        }
       },
       entity_property: {
         type: DataTypes.STRING,
-        isUppercase: { msg: 'Entity property should be in uppercase letters' },
-        defaultValue: '*'
+        defaultValue: '*',
+        validate: {
+          isUppercase: { msg: 'Entity property should be in uppercase letters' }
+        }
       },
       fee_type: {
         type: DataTypes.STRING,
@@ -68,8 +72,14 @@ module.exports = (sequelize, DataTypes) => {
           isIn: [['FLAT', 'PERC', 'FLAT PERC']]
         }
       },
-      fee_flat: { type: DataTypes.DECIMAL, defaultValue: 0 },
-      fee_value: { type: DataTypes.DECIMAL, defaultValue: 0 }
+      fee_flat: {
+        type: DataTypes.DECIMAL(10, 2),
+        defaultValue: 0
+      },
+      fee_value: {
+        type: DataTypes.DECIMAL(10, 2),
+        defaultValue: 0
+      }
     },
     {
       sequelize,

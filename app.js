@@ -153,7 +153,7 @@ app.post(
       entityProperty, //optional, MASTERCARD, VISA, MTN, GTBANK
       feeType, //FLAT, PERC OR FLAT PERC
       feeFlat, //optional, flat amount to be added if feeType is FLAT or FLAT PERC
-      feeValue //amount to be charged for the transaction fee, can be decimal
+      feeValue //optional, amount to be charged for the transaction fee, can be decimal
     } = req.body
 
     try {
@@ -189,7 +189,7 @@ app.post(
   '/compute-transaction-fee',
   //passport.authenticate('jwt', { session: false }),
   async (req, res) => {
-    const { paymentEntityUuid, amount, currency } = req.body
+    const { paymentEntityUuid, amount, currency, currencyCountry } = req.body
 
     try {
       const paymentMethod = await PaymentEntity.findOne({
@@ -200,56 +200,71 @@ app.post(
         where: { id: paymentMethod.customerId }
       })
 
+      let payIssuer = {
+        fee_currency: currency,
+        fee_entity: _.toUpper(_.kebabCase(paymentMethod.type)),
+        entity_property: paymentMethod.issuer
+      }
+
       const feeConfig = await Fee.findOne({
-        where: {
-          [Op.or]: [
-            {
-              fee_currency: currency,
-              fee_entity: _.toUpper(_.kebabCase(paymentMethod.type)),
-              entity_property: paymentMethod.issuer || paymentMethod.brand
+        //{
+        where:
+          //[Op.or]: [
+          {
+            fee_currency: currency,
+            fee_locale: {
+              [Op.or]: ['LOCL', 'INTL', '*']
             },
-            {
-              fee_currency: currency,
-              fee_entity: _.toUpper(_.kebabCase(paymentMethod.type)),
-              entity_property: '*'
+            fee_entity: {
+              [Op.or]: [_.toUpper(_.kebabCase(paymentMethod.type)), '*']
             },
-            {
-              fee_currency: currency,
-              fee_locale: '*',
-              fee_entity: _.toUpper(_.kebabCase(paymentMethod.type)),
-              entity_property: '*'
-            },
-            {
-              fee_currency: currency,
-              fee_locale: '*',
-              fee_entity: '*',
-              entity_property: '*'
+            entity_property: {
+              [Op.or]: [paymentMethod.issuer, paymentMethod.brand, '*']
             }
-          ]
-        }
+          }
+        // {
+        //   fee_currency: currency,
+        //   fee_entity: _.toUpper(_.kebabCase(paymentMethod.type)),
+        //   entity_property: paymentMethod.brand
+        // },
+        // {
+        //   fee_currency: currency,
+        //   fee_locale: '*',
+        //   fee_entity: '*',
+        //   entity_property: '*'
+        // }
+        //]
+        //}
       })
 
       !feeConfig &&
         res.status(400).json({
-          error: 'No valid configuration exists for this payment entity.'
+          error: 'No valid configuration exists for this payment method.'
         })
 
       const transaction = new Transaction({
         paymentEntityId: paymentMethod.id,
         amount,
-        currency
+        currency,
+        currency_country: currencyCountry
       })
       await transaction.save()
 
       const appliedFee = () => {
-        if (_.toUpper(feeConfig.fee_type) === 'FLAT') {
-          return transaction.amount + feeConfig.fee_flat
-        } else if (_.toUpper(feeConfig.fee_type) === 'PERC') {
-          return (feeConfig.fee_value * transaction.amount) / 100
-        } else if (_.toUpper(feeConfig.fee_type) === 'FLAT PERC') {
+        if (_.upperCase(feeConfig.fee_type) === 'FLAT') {
+          return parseFloat(transaction.amount) + parseFloat(feeConfig.fee_flat)
+        } else if (_.upperCase(feeConfig.fee_type) === 'PERC') {
           return (
-            feeConfig.fee_flat +
-            (feeConfig.fee_value * transaction.amount) / 100
+            (parseFloat(feeConfig.fee_value).toFixed(2) *
+              parseFloat(transaction.amount).toFixed(2)) /
+            100
+          )
+        } else if (_.upperCase(feeConfig.fee_type) === 'FLAT PERC') {
+          return (
+            parseFloat(feeConfig.fee_flat).toFixed(2) +
+            (parseFloat(feeConfig.fee_value).toFixed(2) *
+              parseFloat(transaction.amount).toFixed(2)) /
+              100
           )
         }
       }
@@ -266,7 +281,7 @@ app.post(
         SettlementAmount: chargeAmount() - appliedFee()
       })
     } catch (error) {
-      //console.log(error)
+      console.log(error)
       return res.status(500).json(error)
     }
   }

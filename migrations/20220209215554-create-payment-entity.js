@@ -15,11 +15,11 @@ module.exports = {
       },
       type: {
         type: DataTypes.STRING,
-        allowNull: false
+        defaultValue: ''
       },
       brand: {
         type: DataTypes.STRING,
-        defaultValue: '*'
+        defaultValue: ''
       },
       country: {
         type: DataTypes.STRING,
@@ -27,11 +27,11 @@ module.exports = {
       },
       number: {
         type: DataTypes.BIGINT,
-        allowNull: true
+        allowNull: false
       },
       six_id: {
-        type: DataTypes.INTEGER,
-        allowNull: true
+        type: DataTypes.BIGINT,
+        allowNull: false
       },
       customerId: {
         allowNull: false,

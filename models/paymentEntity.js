@@ -9,8 +9,8 @@ module.exports = (sequelize, DataTypes) => {
     toJSON() {
       return {
         ...this.get(),
-        customerId: undefined,
-        number: undefined
+        id: undefined,
+        customerId: undefined
       }
     }
   }
@@ -28,18 +28,17 @@ module.exports = (sequelize, DataTypes) => {
       },
       type: {
         type: DataTypes.STRING,
-        allowNull: false,
         validate: {
-          notNull: {
-            msg: 'Please enter a payment entity type (credit-card, debit-card, bank-account, ussd)'
-          },
-          notEmpty: { msg: 'Payment entity type cannot be blank' }
-        }
+          isUppercase: true
+        },
+        defaultValue: ''
       },
       brand: {
         type: DataTypes.STRING,
-        isUppercase: true,
-        defaultValue: '*'
+        validate: {
+          isUppercase: true
+        },
+        defaultValue: ''
       },
       country: {
         type: DataTypes.STRING,
@@ -53,14 +52,12 @@ module.exports = (sequelize, DataTypes) => {
       number: {
         type: DataTypes.BIGINT,
         validate: {
-          isNumeric: {
-            msg: 'Please enter a valid 16-digit card number, 11-digit phone number or 10-digit bank account number'
-          },
+          isNumeric: { msg: 'Please enter a valid card or phone number' },
           len: [10, 16]
         }
       },
       six_id: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.BIGINT,
         validate: {
           isNumeric: { msg: 'Please enter a valid 6-digit number' },
           len: [6, 6]

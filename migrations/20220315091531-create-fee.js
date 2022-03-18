@@ -33,12 +33,12 @@ module.exports = {
         allowNull: false
       },
       fee_flat: {
-        type: DataTypes.INTEGER,
-        defaultValue: 0
+        type: DataTypes.DECIMAL(10, 2),
+        defaultValue: 0.0
       },
       fee_value: {
-        type: DataTypes.DECIMAL,
-        defaultValue: 0
+        type: DataTypes.DECIMAL(10, 2),
+        defaultValue: 0.0
       },
       createdAt: {
         allowNull: false,

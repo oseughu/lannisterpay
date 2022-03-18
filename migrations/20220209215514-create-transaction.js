@@ -8,11 +8,16 @@ module.exports = {
         primaryKey: true,
         type: DataTypes.INTEGER
       },
+      uuid: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4 },
       amount: {
-        type: DataTypes.DECIMAL,
+        type: DataTypes.DECIMAL(10, 2),
         allowNull: false
       },
       currency: {
+        type: DataTypes.STRING,
+        allowNull: false
+      },
+      currency_country: {
         type: DataTypes.STRING,
         allowNull: false
       },
