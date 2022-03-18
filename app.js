@@ -211,9 +211,6 @@ app.post(
               fee_entity: {
                 [Op.or]: [paymentMethod.type, '*']
               },
-              fee_locale: {
-                [Op.or]: ['LOCL', '*']
-              },
               fee_currency: currency
             },
             {
@@ -222,9 +219,6 @@ app.post(
               },
               fee_entity: {
                 [Op.or]: [paymentMethod.type, '*']
-              },
-              fee_locale: {
-                [Op.or]: ['INTL', '*']
               },
               fee_currency: currency
             }
