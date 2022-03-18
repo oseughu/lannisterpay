@@ -124,6 +124,7 @@ app.post(
     let type
     let property
     let value
+    let chargeAmount
 
     try {
       const paymentMethod = await PaymentEntity.findOne({
@@ -193,7 +194,7 @@ app.post(
         ).toFixed(2)
       }
 
-      const chargeAmount = customer.bears_fee
+      chargeAmount = customer.bears_fee
         ? parseFloat(transaction.amount) + parseFloat(value)
         : parseFloat(transaction.amount)
 
