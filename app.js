@@ -124,7 +124,6 @@ app.post(
     let type
     let property
     let value
-    let finalAmount
 
     try {
       const paymentMethod = await PaymentEntity.findOne({
@@ -181,9 +180,6 @@ app.post(
 
       if (_.upperCase(feeConfig.fee_type) === 'FLAT') {
         value = +parseFloat(feeConfig.fee_flat).toFixed(2)
-        return +(
-          parseFloat(transaction.amount) + parseFloat(feeConfig.fee_flat)
-        ).toFixed(2)
       } else if (_.upperCase(feeConfig.fee_type) === 'PERC') {
         value = +(
           (parseFloat(feeConfig.fee_value) * parseFloat(transaction.amount)) /
@@ -197,16 +193,15 @@ app.post(
         ).toFixed(2)
       }
 
-      const chargeAmount = () =>
-        customer.bears_fee
-          ? parseFloat(transaction.amount) + parseFloat(value)
-          : parseFloat(transaction.amount)
+      const chargeAmount = customer.bears_fee
+        ? parseFloat(transaction.amount) + parseFloat(value)
+        : parseFloat(transaction.amount)
 
       return res.json({
         AppliedFeeID: feeConfig.fee_id,
         AppliedFeeValue: value,
-        ChargeAmount: chargeAmount(),
-        SettlementAmount: chargeAmount() - value
+        ChargeAmount: chargeAmount,
+        SettlementAmount: chargeAmount - value
       })
     } catch (error) {
       //console.log(error)
