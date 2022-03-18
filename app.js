@@ -19,7 +19,8 @@ const {
   Fee
 } = require('./models')
 
-const { Op } = require('@sequelize/core')
+//const { Op } = require('@sequelize/core')
+const { Op } = require('sequelize')
 
 app.use(compression())
 app.use(express.urlencoded({ extended: true }))
@@ -126,11 +127,11 @@ app.post(
       const paymentEntity = new PaymentEntity({
         customerId: customer.id,
         issuer, //GTBANK, MTN
-        type,
+        type, //USSD, CREDIT-CARD, BANK-ACCOUNT
         brand, //optional, MASTERCARD, VISA
-        country,
-        number, //credit card or phone number
-        six_id: sixId //last six digits of credit card, can be null for phone number
+        country, //NG
+        number, //card or phone number
+        six_id: sixId //last six digits of card or phone number
       })
       await paymentEntity.save()
       return res.json(paymentEntity)
@@ -202,16 +203,32 @@ app.post(
 
       const feeConfig = await Fee.findOne({
         where: {
-          fee_currency: currency,
-          fee_locale: {
-            [Op.or]: ['LOCL', 'INTL', '*']
-          },
-          fee_entity: {
-            [Op.or]: [_.toUpper(_.kebabCase(paymentMethod.type)), '*']
-          },
-          entity_property: {
-            [Op.or]: [paymentMethod.issuer, paymentMethod.brand, '*']
-          }
+          [Op.or]: [
+            {
+              entity_property: {
+                [Op.or]: [paymentMethod.brand, '*']
+              },
+              fee_entity: {
+                [Op.or]: [paymentMethod.type, '*']
+              },
+              fee_locale: {
+                [Op.or]: ['LOCL', '*']
+              },
+              fee_currency: currency
+            },
+            {
+              entity_property: {
+                [Op.or]: [paymentMethod.issuer, '*']
+              },
+              fee_entity: {
+                [Op.or]: [paymentMethod.type, '*']
+              },
+              fee_locale: {
+                [Op.or]: ['INTL', '*']
+              },
+              fee_currency: currency
+            }
+          ]
         }
       })
 
@@ -230,20 +247,20 @@ app.post(
 
       const appliedFee = () => {
         if (_.upperCase(feeConfig.fee_type) === 'FLAT') {
-          return parseFloat(transaction.amount) + parseFloat(feeConfig.fee_flat)
+          return +(
+            parseFloat(transaction.amount) + parseFloat(feeConfig.fee_flat)
+          ).toFixed(2)
         } else if (_.upperCase(feeConfig.fee_type) === 'PERC') {
-          return (
-            (parseFloat(feeConfig.fee_value).toFixed(2) *
-              parseFloat(transaction.amount).toFixed(2)) /
+          return +(
+            (parseFloat(feeConfig.fee_value) * parseFloat(transaction.amount)) /
             100
-          )
+          ).toFixed(2)
         } else if (_.upperCase(feeConfig.fee_type) === 'FLAT PERC') {
-          return (
-            parseFloat(feeConfig.fee_flat).toFixed(2) +
-            (parseFloat(feeConfig.fee_value).toFixed(2) *
-              parseFloat(transaction.amount).toFixed(2)) /
+          return +(
+            parseFloat(feeConfig.fee_flat) +
+            (parseFloat(feeConfig.fee_value) * parseFloat(transaction.amount)) /
               100
-          )
+          ).toFixed(2)
         }
       }
 
@@ -259,35 +276,35 @@ app.post(
         SettlementAmount: chargeAmount() - appliedFee()
       })
     } catch (error) {
-      console.log(error)
+      //console.log(error)
       return res.status(500).json(error)
     }
   }
 )
 
-app.get(
-  '/:uuid/transactions',
-  //passport.authenticate('jwt', { session: false }),
-  async (req, res) => {
-    const customerUuid = req.params.uuid
+// app.get(
+//   '/:uuid/transactions',
+//   //passport.authenticate('jwt', { session: false }),
+//   async (req, res) => {
+//     const customerUuid = req.params.uuid
 
-    try {
-      const customer = await Customer.findOne({
-        where: { uuid: customerUuid }
-      })
-      const transactions = await Transaction.findAll({
-        where: { customerId: customer.id },
-        include: ['payment_method']
-      })
-      return res.json(transactions)
-    } catch (error) {
-      //console.log(error)
-      return res.status(500).json({
-        error: 'No transactions for this user or user does not exist.'
-      })
-    }
-  }
-)
+//     try {
+//       const customer = await Customer.findOne({
+//         where: { uuid: customerUuid }
+//       })
+//       const transactions = await Transaction.findAll({
+//         where: { customerId: customer.id },
+//         include: ['payment_method']
+//       })
+//       return res.json(transactions)
+//     } catch (error) {
+//       //console.log(error)
+//       return res.status(500).json({
+//         error: 'No transactions for this user or user does not exist.'
+//       })
+//     }
+//   }
+// )
 
 app.listen(port, async () => {
   //console.log('Server started successfully!')

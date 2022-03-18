@@ -21,7 +21,7 @@ module.exports = (sequelize, DataTypes) => {
     {
       uuid: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4 },
       amount: {
-        type: DataTypes.FLOAT,
+        type: DataTypes.DECIMAL(10, 2),
         allowNull: false,
         validate: {
           notNull: { msg: 'Please enter an amount for this transaction' },

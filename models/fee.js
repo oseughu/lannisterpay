@@ -34,7 +34,9 @@ module.exports = (sequelize, DataTypes) => {
       fee_locale: {
         type: DataTypes.STRING,
         defaultValue: '*',
-        isIn: [['LOCL', 'INTL']]
+        validate: {
+          isIn: [['LOCL', 'INTL']]
+        }
       },
       fee_currency: {
         type: DataTypes.STRING,
