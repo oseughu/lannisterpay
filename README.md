@@ -2,7 +2,7 @@
 
 This api was built to compute transaction fees using specific configurations. Built with Node, Express, MySQL2, and Sequelize. Hosted on Heroku and Clever Cloud.
 
-NB: All request fields labelled optional (that you don't intend to fill) should be excluded from the request altogether, not left blank.
+NB: All request fields labelled optional (that you don't intend to fill) can be null.
 
 ## Please start by signing up with the following details in the request:
 
@@ -41,7 +41,7 @@ https://lannpay.herokuapp.com/fees
 - feeFlat (optional, flat amount to be added if feeType is FLAT or FLAT PERC)
 - feeValue (optional, amount to be charged for the transaction fee, can be decimal)
 
-## And finally, to compute your transaction fee, you only need three fields:
+## And finally, to compute your transaction fee, you need four fields:
 
 https://lannpay.herokuapp.com/compute-transaction-fee
 
