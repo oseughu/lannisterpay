@@ -195,8 +195,8 @@ app.post(
       }
 
       chargeAmount = customer.bears_fee
-        ? parseFloat(transaction.amount) + parseFloat(value)
-        : parseFloat(transaction.amount)
+        ? +(parseFloat(transaction.amount) + parseFloat(value)).toFixed(2)
+        : +parseFloat(transaction.amount).toFixed(2)
 
       return res.json({
         AppliedFeeID: feeConfig.fee_id,
