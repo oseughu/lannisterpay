@@ -20,33 +20,30 @@ module.exports = (sequelize, DataTypes) => {
       uuid: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4 },
       issuer: {
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: true,
         validate: {
-          notNull: { msg: 'Please enter an issuer (GTBank, Wema, MTN)' },
-          notEmpty: { msg: 'Issuer field cannot be blank' }
+          isUppercase: true
         }
       },
       type: {
         type: DataTypes.STRING,
+        allowNull: true,
         validate: {
           isUppercase: true
-        },
-        defaultValue: ''
+        }
       },
       brand: {
         type: DataTypes.STRING,
+        allowNull: true,
         validate: {
           isUppercase: true
-        },
-        defaultValue: ''
+        }
       },
       country: {
         type: DataTypes.STRING,
-        allowNull: false,
+        allowNull: true,
         validate: {
-          notNull: { msg: 'Please enter a country' },
-          notEmpty: { msg: 'Country field cannot be blank' },
-          isIn: [['NG', 'US', 'UK']]
+          isUppercase: true
         }
       },
       number: {

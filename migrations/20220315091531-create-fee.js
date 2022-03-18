@@ -34,11 +34,11 @@ module.exports = {
       },
       fee_flat: {
         type: DataTypes.DECIMAL(10, 2),
-        defaultValue: 0.0
+        defaultValue: 0
       },
       fee_value: {
         type: DataTypes.DECIMAL(10, 2),
-        defaultValue: 0.0
+        defaultValue: 0
       },
       createdAt: {
         allowNull: false,

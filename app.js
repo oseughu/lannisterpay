@@ -19,8 +19,7 @@ const {
   Fee
 } = require('./models')
 
-//const { Op } = require('@sequelize/core')
-const { Op } = require('sequelize')
+const { Op } = require('@sequelize/core')
 
 app.use(compression())
 app.use(express.urlencoded({ extended: true }))
@@ -201,24 +200,20 @@ app.post(
         where: { id: paymentMethod.customerId }
       })
 
-      const locale = () => (currencyCountry === 'NG' ? 'LOCL' : 'INTL')
-      const property = () =>
+      const locale = currencyCountry === 'NG' ? 'LOCL' : 'INTL'
+      const property =
         paymentMethod.brand === '' ? paymentMethod.issuer : paymentMethod.brand
 
       const feeConfig = await Fee.findOne({
         where: {
           fee_currency: currency,
-          fee_locale: {
-            [Op.or]: [locale(), '*']
-          },
-          fee_entity: {
-            [Op.or]: [paymentMethod.type, '*']
-          },
-          entity_property: {
-            [Op.or]: [property(), '*']
-          }
+          fee_locale: locale,
+          fee_entity: paymentMethod.type,
+          entity_property: property
         }
       })
+
+      console.log(feeConfig)
 
       !feeConfig &&
         res.status(400).json({

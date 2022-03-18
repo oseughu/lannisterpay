@@ -11,19 +11,19 @@ module.exports = {
       uuid: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4 },
       issuer: {
         type: DataTypes.STRING,
-        allowNull: false
+        allowNull: true
       },
       type: {
         type: DataTypes.STRING,
-        defaultValue: ''
+        allowNull: true
       },
       brand: {
         type: DataTypes.STRING,
-        defaultValue: ''
+        allowNull: true
       },
       country: {
         type: DataTypes.STRING,
-        allowNull: false
+        allowNull: true
       },
       number: {
         type: DataTypes.BIGINT,
