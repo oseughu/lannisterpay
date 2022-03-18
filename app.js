@@ -123,10 +123,10 @@ app.post(
       })
       const paymentEntity = new PaymentEntity({
         customerId: customer.id,
-        issuer, //GTBANK, MTN
-        type, //USSD, CREDIT-CARD, BANK-ACCOUNT
+        issuer, //optional, GTBANK, MTN
+        type, //optional, USSD, CREDIT-CARD, BANK-ACCOUNT
         brand, //optional, MASTERCARD, VISA
-        country, //NG
+        country, //optional, NG
         number, //card or phone number
         six_id: sixId //last six digits of card or phone number
       })
@@ -188,9 +188,10 @@ app.post(
   //passport.authenticate('jwt', { session: false }),
   async (req, res) => {
     const { paymentEntityUuid, amount, currency, currencyCountry } = req.body
-    let property
+
     let locale
     let type
+    let property
 
     try {
       const paymentMethod = await PaymentEntity.findOne({
@@ -200,14 +201,6 @@ app.post(
       const customer = await Customer.findOne({
         where: { id: paymentMethod.customerId }
       })
-
-      if (paymentMethod.brand === null && paymentMethod.issuer === null) {
-        property = '*'
-      } else if (paymentMethod.brand === null) {
-        property = paymentMethod.issuer
-      } else {
-        property = paymentMethod.brand
-      }
 
       if (paymentMethod.country === null) {
         locale = '*'
@@ -221,6 +214,14 @@ app.post(
         type = '*'
       } else {
         type = _.toUpper(_.kebabCase(paymentMethod.type))
+      }
+
+      if (paymentMethod.brand === null && paymentMethod.issuer === null) {
+        property = '*'
+      } else if (paymentMethod.brand === null) {
+        property = _.upperCase(paymentMethod.issuer)
+      } else {
+        property = _.upperCase(paymentMethod.brand)
       }
 
       const feeConfig = await Fee.findOne({
