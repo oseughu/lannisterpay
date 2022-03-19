@@ -153,6 +153,11 @@ app.post(
         property = '*'
       } else if (paymentMethod.brand !== null) {
         property = _.upperCase(paymentMethod.brand)
+      } else if (
+        !_.upperCase(paymentMethod.issuer).includes('BANK') ||
+        !_.upperCase(paymentMethod.issuer).includes('WALLET')
+      ) {
+        property = _.upperCase(paymentMethod.issuer)
       } else {
         property = '*'
       }
