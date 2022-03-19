@@ -4,7 +4,7 @@ This api was built to compute transaction fees using specific configurations. Bu
 
 NB: All request fields labelled optional (that you don't intend to fill) can be null. You should exclude them from the request.
 
-## Please start by signing up with the following details in the request:
+## Please start by signing up with the following details in the request (urlencoded or json, both work):
 
 https://lannpay.herokuapp.com/register
 
@@ -14,7 +14,7 @@ https://lannpay.herokuapp.com/register
 
 Please copy your unique user identifier (uuid) and keep it handy as you cannot add a payment entity or make a transaction without it. If you lose it, just sign up again with a different email, it doesn't have to be a real one, just valid email syntax.
 
-## Add a payment method by filling in the following fields (urlencoded or json, both work):
+## To add a payment method, you need the following fields (urlencoded or json, both work):
 
 https://lannpay.herokuapp.com/add-payment-method
 
@@ -28,7 +28,7 @@ https://lannpay.herokuapp.com/add-payment-method
 
 the uuid for each payment entity is returned after it has been added successfully, note this down too.
 
-## To Add a new fee configuration specification, you need to fill the following fields:
+## To add a new fee configuration specification, you need the following fields (urlencoded or json, both work):
 
 https://lannpay.herokuapp.com/fees
 
@@ -41,7 +41,7 @@ https://lannpay.herokuapp.com/fees
 - feeFlat (optional, flat amount to be added if feeType is FLAT or FLAT PERC)
 - feeValue (optional, amount to be charged for the transaction fee, can be decimal)
 
-## And finally, to compute your transaction fee, you need four fields:
+## To compute your transaction fee, you need the following fields (urlencoded or json, both work):
 
 https://lannpay.herokuapp.com/compute-transaction-fee
 
