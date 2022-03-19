@@ -131,10 +131,6 @@ app.post(
         where: { uuid: paymentEntityUuid }
       })
 
-      const customer = await Customer.findOne({
-        where: { id: paymentMethod.customerId }
-      })
-
       if (paymentMethod.country === null) {
         locale = '*'
       } else if (paymentMethod.country === currencyCountry) {
@@ -161,7 +157,7 @@ app.post(
       } else {
         property = '*'
       }
- 
+
       const feeConfig = await Fee.findOne({
         where: {
           fee_currency: currency,
@@ -198,6 +194,10 @@ app.post(
             100
         ).toFixed(2)
       }
+
+      const customer = await Customer.findOne({
+        where: { id: paymentMethod.customerId }
+      })
 
       chargeAmount = customer.bears_fee
         ? +(parseFloat(transaction.amount) + parseFloat(value)).toFixed(2)
