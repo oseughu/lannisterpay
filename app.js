@@ -161,7 +161,7 @@ app.post(
       } else {
         property = '*'
       }
-
+ 
       const feeConfig = await Fee.findOne({
         where: {
           fee_currency: currency,
