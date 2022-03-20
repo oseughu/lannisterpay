@@ -1,5 +1,5 @@
 require('dotenv').config()
-var _ = require('lodash')
+const _ = require('lodash')
 const compression = require('compression')
 const express = require('express')
 const app = express()
