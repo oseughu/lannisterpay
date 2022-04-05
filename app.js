@@ -1,115 +1,72 @@
 require('dotenv').config()
-const _ = require('lodash')
-const compression = require('compression')
-const express = require('express')
+import _ from 'lodash'
+import compression from 'compression'
+import express, { urlencoded, json } from 'express'
+import Redis from 'ioredis'
+import { Fee, Transaction } from './models/schema'
+
+const redis = new Redis(`${process.env.REDIS_URL}`)
 const app = express()
 const port = process.env.PORT || 3000
 
-const {
-  sequelize,
-  Customer,
-  Transaction,
-  PaymentEntity,
-  Fee
-} = require('./models')
-
 app.use(compression())
-app.use(express.urlencoded({ extended: true }))
-app.use(express.json())
-
-app.post('/register', async (req, res) => {
-  const { fullName, email, /*password,*/ bearsFee } = req.body
-
-  try {
-    const alreadyExists = await Customer.findOne({ where: { email } })
-    if (alreadyExists) {
-      return res.status(400).json({ error: 'User already exists.' })
-    } else {
-      // bcrypt.hash(password, saltRounds, (err, hash) => {
-      const newUser = new Customer({
-        full_name: fullName,
-        email,
-        bears_fee: bearsFee
-      })
-      newUser.save()
-      return res.json(newUser)
-      //})
-    }
-  } catch (error) {
-    //console.log(error)
-    return res.status(500).json(error)
-  }
-})
-
-app.post(
-  '/add-payment-method',
-  // passport.authenticate('jwt', { session: false }),
-  async (req, res) => {
-    const { customerUuid, issuer, type, brand, country, number, sixId } =
-      req.body
-
-    try {
-      const customer = await Customer.findOne({
-        where: { uuid: customerUuid }
-      })
-      const paymentEntity = new PaymentEntity({
-        customerId: customer.id,
-        issuer, //optional, GTBANK, MTN
-        type, //optional, USSD, CREDIT-CARD, BANK-ACCOUNT
-        brand, //optional, MASTERCARD, VISA
-        country, //optional, NG
-        number, //card or phone number
-        six_id: sixId //last six digits of card or phone number
-      })
-      await paymentEntity.save()
-      return res.json(paymentEntity)
-    } catch (error) {
-      // console.log(error)
-      return res.status(500).json(error)
-    }
-  }
-)
+app.use(urlencoded({ extended: true }))
+app.use(json())
 
 app.post(
   '/fees',
   // passport.authenticate('jwt', { session: false }),
   async (req, res) => {
-    const {
-      feeId,
+    const { FeeConfigurationSpec } = req.body
+
+    let feeId,
       feeLocale, //optional, LOCL or INTL
       feeCurrency,
       feeEntity, //optional, CREDIT-CARD, DEBIT-CARD, BANK-ACCOUNT, USSD
       entityProperty, //optional, MASTERCARD, VISA, MTN, GTBANK
       feeType, //FLAT, PERC OR FLAT PERC
       feeFlat, //optional, flat amount to be added if feeType is FLAT or FLAT PERC
-      feeValue //optional, amount to be charged for the transaction fee, can be decimal
-    } = req.body
+      feePerc, //optional, percentage value to be charged for the transaction if feeType is PERC or FLAT PERC
+      feeValue
+
+    let newArr = FeeConfigurationSpec.split('\n')
+
+    newArr.forEach(spec => {
+      let specArr = spec.split(' ')
+      let feeArr = specArr[7].split(':')
+      feeId = specArr[0]
+      feeCurrency = specArr[1]
+      feeLocale = specArr[2]
+      feeEntity = specArr[3]
+      entityProperty = specArr[4]
+      feeType = specArr[6]
+      feeFlat = +parseFloat(feeArr[0]).toFixed(2) || 0
+      feePerc = +parseFloat(feeArr[1]).toFixed(2) || 0
+      feeValue =
+        feeType === 'FLAT_PERC'
+          ? `${feeFlat}:${feePerc}`
+          : feeType === 'FLAT'
+          ? feeFlat
+          : feePerc
+    })
 
     try {
-      const alreadyExists = await Fee.findOne({ where: { fee_id: feeId } })
-
-      if (alreadyExists) {
-        return res.status(400).json({
-          Error:
-            'A fee config with that ID already exists. Please rename it and try again.'
-        })
-      } else {
-        const fee = new Fee({
-          fee_id: feeId,
-          fee_locale: feeLocale,
-          fee_currency: feeCurrency,
-          fee_entity: feeEntity,
-          entity_property: entityProperty,
-          fee_type: feeType,
-          fee_flat: feeFlat,
-          fee_value: feeValue
-        })
-        await fee.save()
-        return res.json(fee)
-      }
+      const fee = new Fee({
+        FeeId: feeId,
+        FeeLocale: feeLocale,
+        FeeCurrency: feeCurrency,
+        FeeEntity: feeEntity,
+        EntityProperty: entityProperty,
+        FeeType: feeType,
+        FeeFlat: feeFlat,
+        FeePerc: feePerc,
+        FeeValue: feeValue
+      })
+      await fee.save()
+      res.json(fee)
     } catch (error) {
       //console.log(error)
-      return res.status(500).json(error)
+      res.status(500).json(error)
     }
   }
 )
@@ -118,52 +75,40 @@ app.post(
   '/compute-transaction-fee',
   //passport.authenticate('jwt', { session: false }),
   async (req, res) => {
-    const { paymentEntityUuid, amount, currency, currencyCountry } = req.body
+    const { ID, Amount, Currency, CurrencyCountry, Customer, PaymentEntity } =
+      req.body
 
-    let locale
-    let type
-    let property
-    let value
-    let chargeAmount
+    let customer, paymentMethod, locale, type, property, value, chargeAmount
 
     try {
-      const paymentMethod = await PaymentEntity.findOne({
-        where: { uuid: paymentEntityUuid }
+      const transaction = new Transaction({
+        ID,
+        Amount,
+        Currency,
+        CurrencyCountry,
+        Customer,
+        PaymentEntity
       })
+      await transaction.save()
 
-      if (paymentMethod.country === null) {
-        locale = '*'
-      } else if (paymentMethod.country === currencyCountry) {
-        locale = 'LOCL'
-      } else {
-        locale = 'INTL'
-      }
+      customer = transaction.Customer
 
-      if (paymentMethod.type === null) {
-        type = '*'
-      } else {
-        type = _.toUpper(_.kebabCase(paymentMethod.type))
-      }
+      paymentMethod = transaction.PaymentEntity
 
-      if (paymentMethod.brand === null && paymentMethod.issuer === null) {
-        property = '*'
-      } else if (paymentMethod.brand !== null) {
-        property = _.upperCase(paymentMethod.brand)
-      } else if (
-        !_.upperCase(paymentMethod.issuer).includes('BANK') ||
-        !_.upperCase(paymentMethod.issuer).includes('WALLET')
-      ) {
-        property = _.upperCase(paymentMethod.issuer)
-      } else {
-        property = '*'
-      }
+      paymentMethod.Country === CurrencyCountry
+        ? (locale = 'LOCL')
+        : (locale = 'INTL')
+
+      type = _.toUpper(_.kebabCase(paymentMethod.Type))
+
+      property = _.upperCase(paymentMethod.Brand)
 
       const feeConfig = await Fee.findOne({
         where: {
-          fee_currency: currency,
-          fee_locale: locale,
-          fee_entity: type,
-          entity_property: property
+          FeeCurrency: Currency,
+          FeeLocale: locale,
+          FeeEntity: type,
+          EntityProperty: property
         }
       })
 
@@ -172,52 +117,32 @@ app.post(
           error: 'No valid configuration exists for this payment method.'
         })
 
-      const transaction = new Transaction({
-        paymentEntityId: paymentMethod.id,
-        amount,
-        currency,
-        currency_country: currencyCountry
-      })
-      await transaction.save()
-
-      if (_.upperCase(feeConfig.fee_type) === 'FLAT') {
-        value = +parseFloat(feeConfig.fee_flat).toFixed(2)
-      } else if (_.upperCase(feeConfig.fee_type) === 'PERC') {
-        value = +(
-          (parseFloat(feeConfig.fee_value) * parseFloat(transaction.amount)) /
-          100
-        ).toFixed(2)
-      } else if (_.upperCase(feeConfig.fee_type) === 'FLAT PERC') {
-        value = +(
-          parseFloat(feeConfig.fee_flat) +
-          (parseFloat(feeConfig.fee_value) * parseFloat(transaction.amount)) /
-            100
-        ).toFixed(2)
+      if (_.upperCase(feeConfig.FeeType) === 'FLAT') {
+        value = feeConfig.FeeFlat
+      } else if (_.upperCase(feeConfig.FeeType) === 'PERC') {
+        value =
+          (feeConfig.FeePerc * +parseFloat(transaction.Amount).toFixed(2)) / 100
+      } else if (_.upperCase(feeConfig.FeeType) === 'FLAT_PERC') {
+        value =
+          feeConfig.FeeFlat +
+          (feeConfig.FeePerc * +parseFloat(transaction.Amount).toFixed(2)) / 100
       }
 
-      const customer = await Customer.findOne({
-        where: { id: paymentMethod.customerId }
-      })
+      chargeAmount = customer.BearsFee
+        ? +(parseFloat(transaction.Amount) + value).toFixed(2)
+        : +parseFloat(transaction.Amount).toFixed(2)
 
-      chargeAmount = customer.bears_fee
-        ? +(parseFloat(transaction.amount) + parseFloat(value)).toFixed(2)
-        : +parseFloat(transaction.amount).toFixed(2)
-
-      return res.json({
-        AppliedFeeID: feeConfig.fee_id,
+      res.json({
+        AppliedFeeID: feeConfig.FeeId,
         AppliedFeeValue: value,
         ChargeAmount: chargeAmount,
         SettlementAmount: chargeAmount - value
       })
     } catch (error) {
       //console.log(error)
-      return res.status(500).json(error)
+      res.status(500).json(error)
     }
   }
 )
 
-app.listen(port, async () => {
-  //console.log('Server started successfully!')
-  await sequelize.authenticate()
-  //console.log('Database connected!')
-})
+app.listen(port, () => console.log('Server started successfully.'))
