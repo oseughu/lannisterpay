@@ -7,7 +7,7 @@ connect(`${process.env.MONGO_URL}`, {
   useNewUrlParser: true,
   useUnifiedTopology: true
 })
-console.log('Connected to MongoDB')
+console.log('Connected to MongoDB.')
 
 const feeSchema = new Schema({
   FeeId: String,
