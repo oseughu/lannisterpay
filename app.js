@@ -1,16 +1,15 @@
-require('dotenv').config()
+import 'dotenv/config'
 import _ from 'lodash'
 import compression from 'compression'
-import express, { urlencoded, json } from 'express'
+import express, { json } from 'express'
 import Redis from 'ioredis'
-import { Fee, Transaction } from './models/schema'
+import { Fee, Transaction } from './models/schema.js'
 
 const redis = new Redis(`${process.env.REDIS_URL}`)
 const app = express()
 const port = process.env.PORT || 3000
 
 app.use(compression())
-app.use(urlencoded({ extended: true }))
 app.use(json())
 
 app.post(
@@ -117,16 +116,16 @@ app.post(
           error: 'No valid configuration exists for this payment method.'
         })
 
-      if (_.upperCase(feeConfig.FeeType) === 'FLAT') {
-        value = feeConfig.FeeFlat
-      } else if (_.upperCase(feeConfig.FeeType) === 'PERC') {
-        value =
-          (feeConfig.FeePerc * +parseFloat(transaction.Amount).toFixed(2)) / 100
-      } else if (_.upperCase(feeConfig.FeeType) === 'FLAT_PERC') {
-        value =
-          feeConfig.FeeFlat +
-          (feeConfig.FeePerc * +parseFloat(transaction.Amount).toFixed(2)) / 100
-      }
+      _.upperCase(feeConfig.FeeType) === 'FLAT'
+        ? (value = feeConfig.FeeFlat)
+        : _.upperCase(feeConfig.FeeType) === 'PERC'
+        ? (value =
+            (feeConfig.FeePerc * +parseFloat(transaction.Amount).toFixed(2)) /
+            100)
+        : (value =
+            feeConfig.FeeFlat +
+            (feeConfig.FeePerc * +parseFloat(transaction.Amount).toFixed(2)) /
+              100)
 
       chargeAmount = customer.BearsFee
         ? +(parseFloat(transaction.Amount) + value).toFixed(2)

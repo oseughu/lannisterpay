@@ -1,5 +1,7 @@
-require('dotenv').config()
-import { connect, Schema, model } from 'mongoose'
+import 'dotenv/config'
+import pkg from 'mongoose'
+
+const { Schema, connect, model } = pkg
 
 connect(`${process.env.MONGO_URL}`, {
   useNewUrlParser: true,
