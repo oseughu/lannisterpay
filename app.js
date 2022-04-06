@@ -1,5 +1,4 @@
 import 'dotenv/config'
-import _ from 'lodash'
 import compression from 'compression'
 import express, { json } from 'express'
 import mongoose from 'mongoose'
@@ -88,7 +87,7 @@ app.post(
     const { ID, Amount, Currency, CurrencyCountry, Customer, PaymentEntity } =
       req.body
 
-    let customer, paymentMethod, locale, value, chargeAmount
+    let customer, type, issuer, brand, value, chargeAmount
 
     try {
       const transaction = await Transaction.create({
@@ -101,23 +100,41 @@ app.post(
       })
 
       customer = transaction.Customer
-
       paymentMethod = transaction.PaymentEntity
+      type = transaction.PaymentEntity.Type
+      brand = transaction.PaymentEntity.Brand
+      issuer = transaction.PaymentEntity.Issuer
+
+      console.log(customer, type, brand, issuer)
 
       paymentMethod.Country === transaction.CurrencyCountry
         ? (locale = 'LOCL')
         : (locale = 'INTL')
 
       const feeConfig = await Fee.findOne({
-        FeeCurrency: Currency,
-        $or: [{ FeeLocale: locale }, { FeeLocale: '*' }],
-        $or: [{ FeeEntity: paymentMethod.Type }, { FeeEntity: '*' }],
-        $or: [
-          { EntityProperty: paymentMethod.Brand },
-          { EntityProperty: paymentMethod.Issuer },
-          { EntityProperty: '*' }
+        $and: [
+          {
+            $or: [
+              { EntityProperty: issuer },
+              { EntityProperty: brand },
+              { EntityProperty: '*' }
+            ]
+          },
+          {
+            $or: [{ FeeEntity: type }, { FeeEntity: '*' }]
+          },
+          {
+            $or: [
+              { FeeLocale: 'LOCL' },
+              { FeeLocale: 'INTL' },
+              { FeeLocale: '*' }
+            ]
+          },
+          { FeeCurrency: Currency }
         ]
-      }).cache(3600)
+      }).cache(1800)
+
+      console.log(feeConfig)
 
       !feeConfig &&
         res.status(400).json({

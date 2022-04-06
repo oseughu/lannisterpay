@@ -3,10 +3,7 @@ import pkg from 'mongoose'
 
 const { Schema, connect, model } = pkg
 
-connect(`${process.env.MONGO_URL}`, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-})
+connect(`${process.env.MONGO_URL}`)
 console.log('Connected to MongoDB.')
 
 const feeSchema = new Schema({
