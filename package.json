@@ -3,9 +3,18 @@
   "version": "1.0.0",
   "description": "",
   "type": "module",
+  "imports": {
+    "#src/*": "./src/*.js",
+    "#config/*": "./src/config/*.js",
+    "#controllers/*": "./src/controllers/*.js",
+    "#models/*": "./src/models/*.js",
+    "#routes/*": "./src/routes/*.js",
+    "#routes": "./src/routes/index.js"
+  },
   "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node app",
+    "dev": "nodemon --exec node app"
   },
   "keywords": [],
   "author": "",
@@ -16,5 +25,8 @@
     "express": "^4.17.2",
     "mongoose": "^6.2.10",
     "mongoose-redis-caching": "^1.13.1"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.15"
   }
 }

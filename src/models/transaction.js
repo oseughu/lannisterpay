@@ -1,0 +1,29 @@
+import pkg from 'mongoose'
+import { connectToDb } from '#config/db'
+const { Schema, model } = pkg
+
+connectToDb()
+
+const transactionSchema = new Schema({
+  ID: Number,
+  Amount: Number,
+  Currency: String,
+  CurrencyCountry: String,
+  Customer: {
+    ID: Number,
+    EmailAddress: String,
+    FullName: String,
+    BearsFee: Boolean
+  },
+  PaymentEntity: {
+    ID: Number,
+    Issuer: String,
+    Brand: String,
+    Number: String,
+    SixID: Number,
+    Type: String,
+    Country: String
+  }
+})
+
+export const Transaction = new model('Transaction', transactionSchema)
