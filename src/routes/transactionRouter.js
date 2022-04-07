@@ -88,7 +88,6 @@ transactionRouter.post('/compute-transaction-fee', async (req, res) => {
       SettlementAmount: chargeAmount - value
     })
   } catch (error) {
-    console.log(error)
-    res.status(500).json(error)
+    res.status(500).json({ error: 'An error occurred with this transaction.' })
   }
 })

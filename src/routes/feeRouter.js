@@ -62,7 +62,6 @@ feeRouter.post('/fees', async (req, res) => {
     })
     res.json({ status: 'ok', message: 'Fee Configs successfully added.' })
   } catch (error) {
-    console.log(error)
     res.status(500).json({ error: 'Fee Configs could not be added.' })
   }
 })
