@@ -8,7 +8,7 @@ export const transactionController = async (req, res) => {
   let customer, paymentMethod, locale, type, brand, issuer, value, chargeAmount
 
   try {
-    const transaction = await Transaction.create({
+    const transaction = new Transaction({
       ID,
       Amount,
       Currency,
@@ -17,36 +17,34 @@ export const transactionController = async (req, res) => {
       PaymentEntity
     })
 
+    await transaction.save()
+
     customer = transaction.Customer
     paymentMethod = transaction.PaymentEntity
     type = transaction.PaymentEntity.Type
     brand = transaction.PaymentEntity.Brand
     issuer = transaction.PaymentEntity.Issuer
 
-    console.log(customer, paymentMethod, type, brand, issuer)
-
     paymentMethod.Country === transaction.CurrencyCountry
       ? (locale = 'LOCL')
       : (locale = 'INTL')
 
-    const feeConfig = await Fee.aggregate([
-      {
-        $match: {
-          $expr: {
-            FeeCurrency: Currency,
-            FeeLocale: {
-              $ifNull: [locale, '*']
-            },
-            FeeEntity: {
-              $ifNull: [type, '*']
-            },
-            EntityProperty: {
-              $ifNull: [issuer, brand, '*']
-            }
-          }
-        }
-      }
-    ])
+    console.log(type, brand, issuer, locale)
+
+    const feeConfig = await Fee.findOne({
+      FeeCurrency: Currency,
+      FeeLocale: { $cond: [{ $eq: ['FeeLocale', locale] }, locale, '*'] },
+      FeeEntity: { $cond: [{ $eq: ['FeeEntity', type] }, type, '*'] }
+      //   EntityProperty: {
+      //     $switch: {
+      //       branches: [
+      //         { case: { $eq: ['EntityProperty', issuer] }, then: issuer },
+      //         { case: { $eq: ['EntityProperty', brand] }, then: brand }
+      //       ],
+      //       default: '*'
+      //     }
+      //   }
+    })
 
     console.log(feeConfig)
 

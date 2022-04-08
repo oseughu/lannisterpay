@@ -1,4 +1,3 @@
-import 'dotenv/config'
 import express, { json } from 'express'
 import compression from 'compression'
 import { routes } from '#routes'
