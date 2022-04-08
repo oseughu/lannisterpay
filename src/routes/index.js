@@ -1,9 +1,9 @@
-import express from 'express'
+import { Router } from 'express'
 import { homeRouter } from './homeRouter.js'
 import { feeRouter } from './feeRouter.js'
 import { transactionRouter } from './transactionRouter.js'
 
-export const routes = express.Router()
+export const routes = Router()
 
 routes.use(homeRouter)
 routes.use(feeRouter)

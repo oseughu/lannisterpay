@@ -1,18 +1,15 @@
 import 'dotenv/config'
-import express from 'express'
-import mongoose from 'mongoose'
-import mongooseRedisCaching from 'mongoose-redis-caching'
+import { Router } from 'express'
+import { Fee } from '#models/fee'
 import { Transaction } from '#models/transaction'
 
-mongooseRedisCaching(mongoose)
-
-export const transactionRouter = express.Router()
+export const transactionRouter = Router()
 
 transactionRouter.post('/compute-transaction-fee', async (req, res) => {
   const { ID, Amount, Currency, CurrencyCountry, Customer, PaymentEntity } =
     req.body
 
-  let customer, type, issuer, brand, value, chargeAmount
+  let customer, paymentMethod, locale, type, brand, issuer, value, chargeAmount
 
   try {
     const transaction = await Transaction.create({
@@ -30,34 +27,43 @@ transactionRouter.post('/compute-transaction-fee', async (req, res) => {
     brand = transaction.PaymentEntity.Brand
     issuer = transaction.PaymentEntity.Issuer
 
-    console.log(customer, type, brand, issuer)
+    console.log(customer, paymentMethod, type, brand, issuer)
 
     paymentMethod.Country === transaction.CurrencyCountry
       ? (locale = 'LOCL')
       : (locale = 'INTL')
 
-    const feeConfig = await Fee.findOne({
-      $and: [
-        {
-          $or: [
-            { EntityProperty: issuer },
-            { EntityProperty: brand },
-            { EntityProperty: '*' }
-          ]
-        },
-        {
-          $or: [{ FeeEntity: type }, { FeeEntity: '*' }]
-        },
-        {
-          $or: [
-            { FeeLocale: 'LOCL' },
-            { FeeLocale: 'INTL' },
-            { FeeLocale: '*' }
-          ]
-        },
-        { FeeCurrency: Currency }
-      ]
-    }).cache(1800)
+    const feeConfig = await Fee.aggregate([
+      {
+        $match: {
+          $expr: {
+            $and: [
+              {
+                FeeCurrency: Currency,
+                FeeLocale: {
+                  $cond: [{ $eq: ['FeeLocale', locale] }, locale, '*']
+                },
+                FeeEntity: {
+                  $cond: [{ $eq: ['FeeEntity', type] }, type, '*']
+                },
+                EntityProperty: {
+                  $switch: {
+                    branches: [
+                      {
+                        case: { $eq: ['EntityProperty', issuer] },
+                        then: issuer
+                      },
+                      { case: { $eq: ['EntityProperty', brand] }, then: brand }
+                    ],
+                    default: '*'
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    ])
 
     console.log(feeConfig)
 
@@ -88,6 +94,7 @@ transactionRouter.post('/compute-transaction-fee', async (req, res) => {
       SettlementAmount: chargeAmount - value
     })
   } catch (error) {
+    console.log(error)
     res.status(500).json({ error: 'An error occurred with this transaction.' })
   }
 })

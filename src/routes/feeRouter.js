@@ -1,7 +1,7 @@
-import express from 'express'
+import { Router } from 'express'
 import { Fee } from '#models/fee'
 
-export const feeRouter = express.Router()
+export const feeRouter = Router()
 
 feeRouter.post('/fees', async (req, res) => {
   const { FeeConfigurationSpec } = req.body
