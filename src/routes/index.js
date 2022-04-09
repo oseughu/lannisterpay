@@ -1,7 +1,7 @@
 import { Router } from 'express'
-import { homeRouter } from './homeRouter.js'
-import { feeRouter } from './feeRouter.js'
-import { transactionRouter } from './transactionRouter.js'
+import { homeRouter } from '#routes/homeRouter'
+import { feeRouter } from '#routes/feeRouter'
+import { transactionRouter } from '#routes/transactionRouter'
 
 export const routes = Router()
 
