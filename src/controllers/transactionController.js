@@ -8,7 +8,7 @@ export const transactionController = async (req, res) => {
   let customer, paymentMethod, locale, type, brand, issuer, value, chargeAmount
 
   try {
-    const transaction = new Transaction({
+    const transaction = await Transaction.create({
       ID,
       Amount,
       Currency,
@@ -16,8 +16,6 @@ export const transactionController = async (req, res) => {
       Customer,
       PaymentEntity
     })
-
-    await transaction.save()
 
     customer = transaction.Customer
     paymentMethod = transaction.PaymentEntity
@@ -29,22 +27,56 @@ export const transactionController = async (req, res) => {
       ? (locale = 'LOCL')
       : (locale = 'INTL')
 
-    console.log(type, brand, issuer, locale)
+    console.log(Currency, locale, type, issuer, brand)
 
-    const feeConfig = await Fee.findOne({
-      FeeCurrency: Currency,
-      FeeLocale: { $cond: [{ $eq: ['FeeLocale', locale] }, locale, '*'] },
-      FeeEntity: { $cond: [{ $eq: ['FeeEntity', type] }, type, '*'] }
-      //   EntityProperty: {
-      //     $switch: {
-      //       branches: [
-      //         { case: { $eq: ['EntityProperty', issuer] }, then: issuer },
-      //         { case: { $eq: ['EntityProperty', brand] }, then: brand }
-      //       ],
-      //       default: '*'
-      //     }
-      //   }
-    })
+    const feeConfig = await Fee.aggregate([
+      {
+        $match: {
+          $expr: {
+            $and: [
+              { $eq: ['$FeeCurrency', Currency] },
+              {
+                $eq: [
+                  '$FeeLocale',
+                  {
+                    $cond: [{ $eq: ['$FeeLocale', locale] }, locale, '*']
+                  }
+                ]
+              },
+              {
+                $eq: [
+                  '$FeeEntity',
+                  {
+                    $cond: [{ $eq: ['$FeeEntity', type] }, type, '*']
+                  }
+                ]
+              },
+              {
+                $eq: [
+                  '$EntityProperty',
+                  {
+                    $switch: {
+                      branches: [
+                        {
+                          case: { $eq: ['$EntityProperty', issuer] },
+                          then: issuer
+                        },
+                        {
+                          case: { $eq: ['$EntityProperty', brand] },
+                          then: brand
+                        }
+                      ],
+                      default: '*'
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
+      //{ $limit: 1 }
+    ])
 
     console.log(feeConfig)
 
