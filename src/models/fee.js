@@ -1,8 +1,5 @@
-import pkg from 'mongoose'
-import { connectToDb } from '#config/db'
-const { Schema, model } = pkg
-
-connectToDb()
+import mongoose from 'mongoose'
+const { Schema, model } = mongoose
 
 const feeSchema = new Schema({
   FeeId: String,
