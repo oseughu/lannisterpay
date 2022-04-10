@@ -5,7 +5,15 @@ export const transactionController = async (req, res) => {
   const { ID, Amount, Currency, CurrencyCountry, Customer, PaymentEntity } =
     req.body
 
-  let customer, paymentMethod, locale, type, brand, issuer, value, chargeAmount
+  let customer,
+    paymentMethod,
+    locale,
+    type,
+    brand,
+    issuer,
+    sixId,
+    value,
+    chargeAmount
 
   try {
     const transaction = await Transaction.create({
@@ -22,63 +30,18 @@ export const transactionController = async (req, res) => {
     type = transaction.PaymentEntity.Type
     brand = transaction.PaymentEntity.Brand
     issuer = transaction.PaymentEntity.Issuer
+    sixId = transaction.PaymentEntity.SixID
 
     paymentMethod.Country === transaction.CurrencyCountry
       ? (locale = 'LOCL')
       : (locale = 'INTL')
 
-    console.log(Currency, locale, type, issuer, brand)
-
-    const feeConfig = await Fee.aggregate([
-      {
-        $match: {
-          $expr: {
-            $and: [
-              { $eq: ['$FeeCurrency', Currency] },
-              {
-                $eq: [
-                  '$FeeLocale',
-                  {
-                    $cond: [{ $eq: ['$FeeLocale', locale] }, locale, '*']
-                  }
-                ]
-              },
-              {
-                $eq: [
-                  '$FeeEntity',
-                  {
-                    $cond: [{ $eq: ['$FeeEntity', type] }, type, '*']
-                  }
-                ]
-              },
-              {
-                $eq: [
-                  '$EntityProperty',
-                  {
-                    $switch: {
-                      branches: [
-                        {
-                          case: { $eq: ['$EntityProperty', issuer] },
-                          then: issuer
-                        },
-                        {
-                          case: { $eq: ['$EntityProperty', brand] },
-                          then: brand
-                        }
-                      ],
-                      default: '*'
-                    }
-                  }
-                ]
-              }
-            ]
-          }
-        }
-      }
-      //{ $limit: 1 }
-    ])
-
-    console.log(feeConfig)
+    const feeConfig = await Fee.findOne({
+      FeeCurrency: { $in: [Currency] },
+      FeeLocale: { $in: [locale, '*'] },
+      FeeEntity: { $in: [type, '*'] },
+      EntityProperty: { $in: [sixId, brand, issuer, '*'] }
+    })
 
     !feeConfig &&
       res.status(400).json({
@@ -86,7 +49,7 @@ export const transactionController = async (req, res) => {
       })
 
     feeConfig.FeeType === 'FLAT'
-      ? (value = feeConfig.FeeFlat)
+      ? (value = feeConfig[0].FeeFlat)
       : feeConfig.FeeType === 'PERC'
       ? (value =
           (feeConfig.FeePerc * +parseFloat(transaction.Amount).toFixed(2)) /
@@ -107,7 +70,6 @@ export const transactionController = async (req, res) => {
       SettlementAmount: chargeAmount - value
     })
   } catch (error) {
-    console.log(error)
     res.status(500).json({ error: 'An error occurred with this transaction.' })
   }
 }
