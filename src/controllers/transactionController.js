@@ -27,10 +27,10 @@ export const transactionController = async (req, res) => {
 
     customer = transaction.Customer
     paymentMethod = transaction.PaymentEntity
-    type = transaction.PaymentEntity.Type
-    brand = transaction.PaymentEntity.Brand
-    issuer = transaction.PaymentEntity.Issuer
-    sixId = transaction.PaymentEntity.SixID
+    type = paymentMethod.Type
+    brand = paymentMethod.Brand
+    issuer = paymentMethod.Issuer
+    sixId = paymentMethod.SixID
 
     paymentMethod.Country === transaction.CurrencyCountry
       ? (locale = 'LOCL')
@@ -49,7 +49,7 @@ export const transactionController = async (req, res) => {
       })
 
     feeConfig.FeeType === 'FLAT'
-      ? (value = feeConfig[0].FeeFlat)
+      ? (value = feeConfig.FeeFlat)
       : feeConfig.FeeType === 'PERC'
       ? (value =
           (feeConfig.FeePerc * +parseFloat(transaction.Amount).toFixed(2)) /
