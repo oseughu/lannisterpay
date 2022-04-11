@@ -1,3 +1,4 @@
+import 'dotenv/config'
 import express, { json } from 'express'
 import compression from 'compression'
 import { connectToDb } from '#config/db'
