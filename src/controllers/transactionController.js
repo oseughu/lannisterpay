@@ -5,12 +5,14 @@ export const transactionController = async (req, res) => {
   const { ID, Amount, Currency, CurrencyCountry, Customer, PaymentEntity } =
     req.body
 
+  let query = {}
+
   let customer,
     paymentMethod,
-    locale,
     type,
     brand,
     issuer,
+    number,
     sixId,
     value,
     chargeAmount
@@ -27,21 +29,24 @@ export const transactionController = async (req, res) => {
 
     customer = transaction.Customer
     paymentMethod = transaction.PaymentEntity
-    type = paymentMethod.Type
     brand = paymentMethod.Brand
     issuer = paymentMethod.Issuer
+    number = paymentMethod.Number
     sixId = paymentMethod.SixID
 
-    paymentMethod.Country === transaction.CurrencyCountry
-      ? (locale = 'LOCL')
-      : (locale = 'INTL')
+    query.FeeCurrency = { $eq: Currency }
 
-    const feeConfig = await Fee.findOne({
-      FeeCurrency: { $in: [Currency] },
-      FeeLocale: { $in: [locale, '*'] },
-      FeeEntity: { $in: [type, '*'] },
-      EntityProperty: { $in: [sixId, brand, issuer, '*'] }
-    })
+    paymentMethod.Country === transaction.CurrencyCountry
+      ? (query.FeeLocale = { $in: ['LOCL', '*'] })
+      : (query.FeeLocale = { $in: ['INTL', '*'] })
+
+    query.FeeEntity = { $in: [type, '*'] }
+
+    paymentMethod.Type === 'DEBIT-CARD' || paymentMethod.Type === 'CREDIT-CARD'
+      ? (query.EntityProperty = { $in: [, brand, number, sixId, '*'] })
+      : (query.FeeEntity = { $in: [issuer, number, sixId, '*'] })
+
+    const feeConfig = await Fee.findOne(query)
 
     !feeConfig &&
       res.status(400).json({
