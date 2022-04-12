@@ -43,7 +43,8 @@ export const transactionController = async (req, res) => {
           $or: [
             { FeeEntity: type },
             { EntityProperty: { $in: [number, sixId, brand, issuer] } },
-            { FeeLocale: { $in: [locale] } }
+            { FeeLocale: { $in: [locale] } },
+            { FeeCurrency: Currency }
           ]
         }
       },
