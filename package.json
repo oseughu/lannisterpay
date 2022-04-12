@@ -7,6 +7,7 @@
     "#src/*": "./src/*.js",
     "#config/*": "./src/config/*.js",
     "#controllers/*": "./src/controllers/*.js",
+    "#helpers/*": "./src/helpers/*.js",
     "#models/*": "./src/models/*.js",
     "#routes/*": "./src/routes/*.js",
     "#routes": "./src/routes/index.js"

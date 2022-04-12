@@ -1,14 +1,14 @@
 import { Fee } from '#models/fee'
 import { Transaction } from '#models/transaction'
+import { pipeline } from '#helpers/pipeline'
 
 export const transactionController = async (req, res) => {
   const { ID, Amount, Currency, CurrencyCountry, Customer, PaymentEntity } =
     req.body
 
-  let query = {}
-
   let customer,
     paymentMethod,
+    locale,
     type,
     brand,
     issuer,
@@ -34,34 +34,26 @@ export const transactionController = async (req, res) => {
     number = paymentMethod.Number
     sixId = paymentMethod.SixID
 
-    query.FeeCurrency = { $eq: Currency }
-
     paymentMethod.Country === transaction.CurrencyCountry
-      ? (query.FeeLocale = { $in: ['LOCL', '*'] })
-      : (query.FeeLocale = { $in: ['INTL', '*'] })
+      ? (locale = 'LOCL')
+      : (locale = 'INTL')
 
-    query.FeeEntity = { $in: [type, '*'] }
+    const feeConfig = await Fee.aggregate(pipeline)
 
-    paymentMethod.Type === 'DEBIT-CARD' || paymentMethod.Type === 'CREDIT-CARD'
-      ? (query.EntityProperty = { $in: [, brand, number, sixId, '*'] })
-      : (query.FeeEntity = { $in: [issuer, number, sixId, '*'] })
-
-    const feeConfig = await Fee.findOne(query)
-
-    !feeConfig &&
+    feeConfig.length === 0 &&
       res.status(400).json({
         error: 'No valid configuration exists for this payment method.'
       })
 
-    feeConfig.FeeType === 'FLAT'
-      ? (value = feeConfig.FeeFlat)
-      : feeConfig.FeeType === 'PERC'
+    feeConfig[0].FeeType === 'FLAT'
+      ? (value = feeConfig[0].FeeFlat)
+      : feeConfig[0].FeeType === 'PERC'
       ? (value =
-          (feeConfig.FeePerc * +parseFloat(transaction.Amount).toFixed(2)) /
+          (feeConfig[0].FeePerc * +parseFloat(transaction.Amount).toFixed(2)) /
           100)
       : (value =
-          feeConfig.FeeFlat +
-          (feeConfig.FeePerc * +parseFloat(transaction.Amount).toFixed(2)) /
+          feeConfig[0].FeeFlat +
+          (feeConfig[0].FeePerc * +parseFloat(transaction.Amount).toFixed(2)) /
             100)
 
     chargeAmount = customer.BearsFee
@@ -69,7 +61,7 @@ export const transactionController = async (req, res) => {
       : +parseFloat(transaction.Amount).toFixed(2)
 
     res.json({
-      AppliedFeeID: feeConfig.FeeId,
+      AppliedFeeID: feeConfig[0].FeeId,
       AppliedFeeValue: value,
       ChargeAmount: chargeAmount,
       SettlementAmount: chargeAmount - value
