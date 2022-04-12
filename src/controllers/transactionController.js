@@ -91,7 +91,7 @@ export const transactionController = async (req, res) => {
       { $sort: { criteria: -1 } }
     ])
 
-    feeConfig.length === 0 &&
+    feeConfig.length < 1 &&
       res.status(400).json({
         error: 'No valid configuration exists for this payment method.'
       })
