@@ -98,17 +98,14 @@ export const transactionController = async (req, res) => {
     feeConfig[0].FeeType === 'FLAT'
       ? (value = feeConfig[0].FeeFlat)
       : feeConfig[0].FeeType === 'PERC'
-      ? (value =
-          (feeConfig[0].FeePerc * +parseFloat(transaction.Amount).toFixed(2)) /
-          100)
+      ? (value = (feeConfig[0].FeePerc * transaction.Amount) / 100)
       : (value =
           feeConfig[0].FeeFlat +
-          (feeConfig[0].FeePerc * +parseFloat(transaction.Amount).toFixed(2)) /
-            100)
+          (feeConfig[0].FeePerc * transaction.Amount) / 100)
 
     chargeAmount = customer.BearsFee
-      ? +(parseFloat(transaction.Amount) + value).toFixed(2)
-      : +parseFloat(transaction.Amount).toFixed(2)
+      ? transaction.Amount + value
+      : transaction.Amount
 
     res.json({
       AppliedFeeID: feeConfig[0].FeeId,
@@ -117,7 +114,6 @@ export const transactionController = async (req, res) => {
       SettlementAmount: chargeAmount - value
     })
   } catch (error) {
-    console.log(error)
     res.status(500).json({ error: 'An error occurred with this transaction.' })
   }
 }
