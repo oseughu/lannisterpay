@@ -14,8 +14,8 @@
   },
   "main": "app.js",
   "scripts": {
-    "start": "node app",
-    "dev": "nodemon --exec node app"
+    "start": "node src/app",
+    "dev": "nodemon --exec node src/app"
   },
   "keywords": [],
   "author": "",
