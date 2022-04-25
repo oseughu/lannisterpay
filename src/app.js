@@ -12,4 +12,4 @@ app.use(compression())
 app.use(json())
 app.use(routes)
 
-app.listen(port) //yes this is a port
+app.listen(port)
