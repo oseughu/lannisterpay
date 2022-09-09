@@ -15,17 +15,17 @@
   "main": "app.js",
   "scripts": {
     "start": "node src/app",
-    "dev": "nodemon --exec node src/app"
+    "dev": "nodemon src/app"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "dotenv": "^16.0.1",
+    "dotenv": "^16.0.2",
     "express": "^4.18.1",
-    "mongoose": "^6.3.2"
+    "mongoose": "^6.6.0"
   },
   "devDependencies": {
-    "nodemon": "^2.0.16"
+    "nodemon": "^2.0.19"
   }
 }

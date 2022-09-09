@@ -1,6 +1,6 @@
-import { Fee } from '#models/fee'
+import Fee from '#models/fee'
 
-export const feeController = async (req, res) => {
+const feeController = async (req, res) => {
   const { FeeConfigurationSpec } = req.body
 
   let feeId,
@@ -16,7 +16,7 @@ export const feeController = async (req, res) => {
   try {
     const fees = FeeConfigurationSpec.split('\n')
 
-    fees.forEach(fee => {
+    fees.forEach((fee) => {
       let config = fee.split(' ')
       let entity = config[3].split('(')
       let value = config[7].split(':')
@@ -62,3 +62,5 @@ export const feeController = async (req, res) => {
     res.status(500).json({ error: 'Fee Configs could not be added.' })
   }
 }
+
+export default feeController

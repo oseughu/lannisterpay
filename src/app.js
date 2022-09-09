@@ -1,13 +1,15 @@
+import connectDb from '#config/db'
+import routes from '#routes'
 import 'dotenv/config'
-import express, { json } from 'express'
-import { connectToDb } from '#config/db'
-import { routes } from '#routes'
+import express from 'express'
 
 const port = process.env.PORT || 3000
 const app = express()
-connectToDb()
 
-app.use(json())
+connectDb()
+
 app.use(routes)
 
-app.listen(port)
+app.listen(port, () => {
+  console.log(`Server running on port ${port}`)
+})

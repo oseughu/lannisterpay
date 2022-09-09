@@ -1,3 +1,5 @@
 import mongoose from 'mongoose'
 
-export const connectToDb = () => mongoose.connect(process.env.MONGO_URL)
+ const connectDb = () => mongoose.connect(process.env.MONGO_URL)
+
+ export default connectDb

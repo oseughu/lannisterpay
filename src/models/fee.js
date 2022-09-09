@@ -13,4 +13,6 @@ const feeSchema = new Schema({
   FeeValue: String
 })
 
-export const Fee = new model('Fee', feeSchema)
+ const Fee = new model('Fee', feeSchema)
+
+  export default Fee

@@ -1,7 +1,7 @@
-import { Fee } from '#models/fee'
-import { Transaction } from '#models/transaction'
+import Fee from '#models/fee'
+import Transaction from '#models/transaction'
 
-export const transactionController = async (req, res) => {
+const transactionController = async (req, res) => {
   const { ID, Amount, Currency, CurrencyCountry, Customer, PaymentEntity } =
     req.body
 
@@ -118,3 +118,5 @@ export const transactionController = async (req, res) => {
     res.status(500).json({ error: 'An error occurred with this transaction.' })
   }
 }
+
+export default transactionController

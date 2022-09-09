@@ -1,6 +1,8 @@
+import feeController from '#controllers/feeController'
 import { Router } from 'express'
-import { feeController } from '#controllers/feeController'
 
-export const feeRouter = Router()
+const feeRouter = Router()
 
 feeRouter.post('/fees', feeController)
+
+export default feeRouter
